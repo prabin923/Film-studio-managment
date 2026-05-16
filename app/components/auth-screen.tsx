@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import type { RegisterAs } from "../lib/types";
 import { getStoredAccount } from "../lib/accounts";
@@ -61,6 +62,9 @@ export function AuthScreen({
       </aside>
 
       <section className="auth-main">
+        <Link href="/" className="auth-home-link">
+          ← Back to home
+        </Link>
         <div className="auth-tabs" aria-label="Authentication mode">
           <button
             className={isRegister ? "active" : ""}

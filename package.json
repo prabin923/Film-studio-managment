@@ -5,6 +5,7 @@
   "scripts": {
     "sync-styles": "cp app/globals.css public/globals.css",
     "dev": "npm run sync-styles && next dev",
+    "dev:clean": "rm -rf .next && npm run sync-styles && next dev",
     "build": "npm run sync-styles && next build",
     "start": "next start",
     "lint": "next lint"
