@@ -1,60 +1,64 @@
 "use client";
 
-import { FormEvent, Suspense, useEffect, useState } from "react";
+import { FormEvent, Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthScreen } from "../components/auth-screen";
-import { getStoredAccount, saveAccountToRegistry } from "../lib/accounts";
-import { accountKey, seed } from "../lib/seed";
-import type { Account, AuthMode, Store } from "../lib/types";
-import {
-  accountFromWorkspace,
-  authenticateLogin,
-  createWorkspace,
-  getWorkspace,
-  getWorkspaceManager,
-  loadWorkspaceStore,
-  migrateRegistryAccounts,
-  saveWorkspaceStore,
-} from "../lib/workspaces";
+import { apiLogin, apiMe, apiRegister } from "../lib/api-client";
+import type { AuthMode, RegisterAs } from "../lib/types";
+
+function AuthLoading() {
+  return (
+    <main className="auth-shell auth-shell--loading">
+      <div className="auth-loading">
+        <span className="auth-loading__mark" aria-hidden>
+          WS
+        </span>
+        <p>Loading…</p>
+      </div>
+    </main>
+  );
+}
 
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
+  const modeParam = searchParams.get("mode") === "register" ? "register" : "login";
 
-  const [authMode, setAuthMode] = useState<AuthMode>(initialMode);
+  const [authMode, setAuthMode] = useState<AuthMode>(modeParam);
   const [authError, setAuthError] = useState("");
   const [authPending, setAuthPending] = useState(false);
   const [checking, setChecking] = useState(true);
 
+  const switchMode = useCallback(
+    (next: AuthMode) => {
+      setAuthMode(next);
+      setAuthError("");
+      router.replace(next === "register" ? "/login?mode=register" : "/login", { scroll: false });
+    },
+    [router],
+  );
+
   useEffect(() => {
-    migrateRegistryAccounts();
-    try {
-      const saved = window.localStorage.getItem(accountKey);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Account;
-        if (parsed?.email && parsed.workspaceId) {
-          router.replace("/dashboard");
-          return;
-        }
-      }
-    } catch {
-      window.localStorage.removeItem(accountKey);
-    }
-    setChecking(false);
+    setAuthMode(modeParam);
+  }, [modeParam]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    apiMe()
+      .then(() => {
+        if (!cancelled) router.replace("/dashboard");
+      })
+      .catch(() => {
+        if (!cancelled) setChecking(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
-  useEffect(() => {
-    setAuthMode(searchParams.get("mode") === "register" ? "register" : "login");
-  }, [searchParams]);
-
-  const completeSession = (nextAccount: Account, workspaceStore: Store) => {
-    saveWorkspaceStore(nextAccount.workspaceId, workspaceStore);
-    window.localStorage.setItem(accountKey, JSON.stringify(nextAccount));
-    router.push("/dashboard");
-  };
-
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError("");
     setAuthPending(true);
@@ -73,20 +77,17 @@ function LoginPageContent() {
         return;
       }
 
-      const result = authenticateLogin(email, password);
-      if (!result.ok) {
-        setAuthError(result.error);
-        return;
-      }
-
-      completeSession(result.account, result.store);
+      await apiLogin(email, password);
+      router.replace("/dashboard");
       event.currentTarget.reset();
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Sign in failed.");
     } finally {
       setAuthPending(false);
     }
   };
 
-  const handleRegister = (event: FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setAuthError("");
     setAuthPending(true);
@@ -106,87 +107,37 @@ function LoginPageContent() {
         return;
       }
 
-      const registerAs = String(data.get("registerAs") || "owner");
+      const registerAs = (String(data.get("registerAs") || "owner") === "manager" ? "manager" : "owner") as RegisterAs;
 
-      if (registerAs === "manager") {
-        const ownerEmail = String(data.get("ownerEmail") || "").trim().toLowerCase();
-        if (!ownerEmail) {
-          setAuthError("Enter the studio owner email.");
-          return;
-        }
-        if (getStoredAccount(email)) {
-          setAuthError("This manager email is already registered. Sign in instead.");
-          return;
-        }
-
-        const ownerAccount = getStoredAccount(ownerEmail);
-        if (!ownerAccount || ownerAccount.role !== "owner") {
-          setAuthError("No owner workspace found for that email. Register the owner first.");
-          return;
-        }
-
-        const workspace = getWorkspace(ownerAccount.workspaceId);
-        if (!workspace) {
-          setAuthError("Studio workspace not found. Ask the owner to register again.");
-          return;
-        }
-
-        const existingManager = getWorkspaceManager(workspace.id);
-        if (existingManager) {
-          setAuthError("This studio already has a manager. Sign in with that manager email.");
-          return;
-        }
-
-        const managerAccount = accountFromWorkspace(workspace, {
-          name: String(data.get("name") || ""),
-          email,
-          role: "manager",
-        });
-
-        saveAccountToRegistry({ ...managerAccount, password });
-        const workspaceStore = loadWorkspaceStore(workspace.id) ?? seed;
-        completeSession(managerAccount, workspaceStore);
-        event.currentTarget.reset();
-        return;
-      }
-
-      if (getStoredAccount(email)) {
-        setAuthError("This email is already registered. Sign in instead.");
-        return;
-      }
-
-      const workspace = createWorkspace({
+      await apiRegister({
+        registerAs,
+        email,
+        password,
+        name: String(data.get("name") || ""),
         studioName: String(data.get("studioName") || ""),
         phone: String(data.get("phone") || ""),
         location: String(data.get("location") || ""),
         tagline: String(data.get("tagline") || ""),
-        ownerEmail: email,
+        ownerEmail: String(data.get("ownerEmail") || ""),
       });
 
-      const ownerAccount = accountFromWorkspace(workspace, {
-        name: String(data.get("name") || ""),
-        email,
-        role: "owner",
-      });
-
-      saveAccountToRegistry({ ...ownerAccount, password });
-      const workspaceStore = loadWorkspaceStore(workspace.id) ?? seed;
-      completeSession(ownerAccount, workspaceStore);
+      router.replace("/dashboard");
       event.currentTarget.reset();
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Registration failed.");
     } finally {
       setAuthPending(false);
     }
   };
 
   if (checking) {
-    return null;
+    return <AuthLoading />;
   }
 
   return (
     <AuthScreen
       mode={authMode}
-      setMode={setAuthMode}
-      onModeChange={() => setAuthError("")}
+      onSwitchMode={switchMode}
       onLogin={handleLogin}
       onRegister={handleRegister}
       error={authError}
@@ -197,7 +148,7 @@ function LoginPageContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<AuthLoading />}>
       <LoginPageContent />
     </Suspense>
   );

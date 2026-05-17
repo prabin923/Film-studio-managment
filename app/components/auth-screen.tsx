@@ -9,16 +9,14 @@ import { ManagerJoinFields, RegisterRolePicker, StudioProfileFields } from "./st
 
 export function AuthScreen({
   mode,
-  setMode,
+  onSwitchMode,
   onLogin,
   onRegister,
   error,
   pending,
-  onModeChange,
 }: {
   mode: "login" | "register";
-  setMode: (mode: "login" | "register") => void;
-  onModeChange?: (mode: "login" | "register") => void;
+  onSwitchMode: (mode: "login" | "register") => void;
   onLogin: (event: FormEvent<HTMLFormElement>) => void;
   onRegister: (event: FormEvent<HTMLFormElement>) => void;
   error: string;
@@ -29,8 +27,7 @@ export function AuthScreen({
   const [studioHint, setStudioHint] = useState("");
 
   function switchMode(next: "login" | "register") {
-    setMode(next);
-    onModeChange?.(next);
+    onSwitchMode(next);
     setStudioHint("");
   }
 

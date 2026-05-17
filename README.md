@@ -11,24 +11,32 @@ npm run dev
 
 Open `http://localhost:3000`.
 
+## Database (Prisma Postgres)
+
+1. Link your Prisma Postgres database (writes `DATABASE_URL` to `.env`):
+
+```bash
+PRISMA_API_KEY="<your-api-key>" npx prisma postgres link --database "<DATABASE_ID>"
+```
+
+2. Apply migrations and seed demo data:
+
+```bash
+npm run db:migrate
+npm run db:seed
+npm run db:verify
+```
+
+Demo sign-in after seed: `owner@infinitycreations.com` / `demo12345`
+
 ## Current Implementation
 
-- Register/login screen with local studio workspace onboarding.
-- Operations dashboard with role-aware owner/staff navigation.
+- Register/login with HTTP-only session cookies and Postgres persistence via Prisma.
+- Operations dashboard with role-aware owner/manager navigation.
 - Client and project tracking with package, paid, and due amounts.
 - Expense ledger, salary records, inventory, rental booking, return tracking, and reports.
 - Rental bookings automatically mark inventory as rented; returns mark items available.
-- Studio profile and records persist in browser `localStorage` for the current device.
 - Money is entered in rupees and stored internally as integer paisa.
-
-## Production Upgrade Path
-
-The UI is ready to connect to hosted services. For a full cloud multi-user release, replace the browser `localStorage` store with a Postgres-backed data layer and add real authentication:
-
-- Auth: Clerk or another Next.js-compatible auth provider.
-- Database: Neon Postgres.
-- ORM: Drizzle.
-- Authorization: map authenticated users to `owner` or `staff` roles and guard owner-only finance routes server-side.
 
 ## Verification
 

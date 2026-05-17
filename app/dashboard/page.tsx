@@ -8,21 +8,13 @@ import { MonthlyReports } from "../components/monthly-reports";
 import { NewRentalPayload, RentalForm } from "../components/rental-form";
 import { StudioProfileCard, StudioProfileSetup } from "../components/studio-profile";
 import {
-  getOwnerAccount,
-  getStoredAccount,
-  isStudioProfileComplete,
-  normalizeAccount,
-  saveAccountToRegistry,
-  studioInitials,
-} from "../lib/accounts";
-import {
-  getWorkspaceManager,
-  loadWorkspaceStore,
-  migrateLegacySession,
-  migrateRegistryAccounts,
-  saveWorkspaceStore,
-  syncWorkspaceProfile,
-} from "../lib/workspaces";
+  apiGetWorkspaceTeam,
+  apiLogout,
+  apiMe,
+  apiSaveStore,
+  apiUpdateProfile,
+} from "../lib/api-client";
+import { isStudioProfileComplete, normalizeAccount, studioInitials } from "../lib/accounts";
 import { ProjectCard } from "../components/project-card";
 import {
   Badge,
@@ -37,7 +29,7 @@ import {
 } from "../components/ui";
 import { pageCopy } from "../lib/copy";
 import { money, newId, statusTone, toPaisa } from "../lib/format";
-import { accountKey, nav, seed, storageKey, today } from "../lib/seed";
+import { nav, seed, today } from "../lib/seed";
 import type {
   Account,
   Client,
@@ -81,54 +73,52 @@ export default function DashboardPage() {
   const [loaded, setLoaded] = useState(false);
   const [profileSetupPending, setProfileSetupPending] = useState(false);
   const [profileSetupError, setProfileSetupError] = useState("");
+  const [workspaceTeam, setWorkspaceTeam] = useState<{ manager: Account | null; owner: Account | null }>({
+    manager: null,
+    owner: null,
+  });
 
   useEffect(() => {
-    try {
-      migrateRegistryAccounts();
-      const migrated = migrateLegacySession();
-      const savedAccount = window.localStorage.getItem(accountKey);
+    let cancelled = false;
 
-      if (savedAccount) {
-        const parsedAccount = JSON.parse(savedAccount) as Account;
-        if (parsedAccount?.email) {
-          const normalized = normalizeAccount(parsedAccount);
-          if (normalized.workspaceId) {
-            const workspaceStore = loadWorkspaceStore(normalized.workspaceId);
-            if (workspaceStore) {
-              setStore(normalizeStore(workspaceStore));
-            }
-            setAccount(normalized);
-            setRole(normalized.role);
-          }
-        }
-      } else if (migrated.account?.workspaceId) {
-        setStore(normalizeStore(migrated.store ?? seed));
-        setAccount(migrated.account);
-        setRole(migrated.account.role);
-        const stored = getStoredAccount(migrated.account.email);
-        saveAccountToRegistry({
-          ...migrated.account,
-          password: stored?.password,
-        });
-      }
-    } catch {
-      window.localStorage.removeItem(storageKey);
-      window.localStorage.removeItem(accountKey);
-    }
-    setLoaded(true);
+    apiMe()
+      .then((data) => {
+        if (cancelled) return;
+        setAccount(normalizeAccount(data.account));
+        setStore(normalizeStore(data.store));
+        setRole(data.account.role);
+      })
+      .catch(() => {
+        if (!cancelled) setAccount(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
-    if (loaded && account?.workspaceId) {
-      saveWorkspaceStore(account.workspaceId, store);
-    }
-  }, [account?.workspaceId, loaded, store]);
+    if (!loaded || !account) return;
+
+    const timer = window.setTimeout(() => {
+      apiSaveStore(store).catch((error) => {
+        console.error("Failed to save store:", error);
+      });
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [account, loaded, store]);
 
   useEffect(() => {
-    if (loaded && account) {
-      window.localStorage.setItem(accountKey, JSON.stringify(account));
-    }
-  }, [account, loaded]);
+    if (!loaded || !account || view !== "profile") return;
+
+    apiGetWorkspaceTeam()
+      .then((data) => setWorkspaceTeam({ manager: data.manager, owner: data.owner }))
+      .catch(() => setWorkspaceTeam({ manager: null, owner: null }));
+  }, [account, loaded, view]);
 
   useEffect(() => {
     const target = nav.find((item) => item.view === view);
@@ -335,7 +325,7 @@ export default function DashboardPage() {
     }));
   };
 
-  const handleStudioProfileSetup = (event: FormEvent<HTMLFormElement>) => {
+  const handleStudioProfileSetup = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!account || account.role !== "owner") return;
 
@@ -343,77 +333,55 @@ export default function DashboardPage() {
     setProfileSetupError("");
     try {
       const data = new FormData(event.currentTarget);
-      const nextAccount = normalizeAccount({
-        ...account,
+      const payload = {
+        name: account.name,
+        email: account.email,
         studioName: String(data.get("studioName") || ""),
         location: String(data.get("location") || ""),
         phone: String(data.get("phone") || ""),
         tagline: String(data.get("tagline") || ""),
-      });
+      };
 
+      const nextAccount = normalizeAccount({ ...account, ...payload });
       if (!isStudioProfileComplete(nextAccount)) {
         setProfileSetupError("Enter your studio name, city, and phone.");
         return;
       }
 
-      if (account.workspaceId) {
-        syncWorkspaceProfile(account.workspaceId, {
-          studioName: nextAccount.studioName,
-          phone: nextAccount.phone,
-          location: nextAccount.location,
-          tagline: nextAccount.tagline,
-        });
-      }
-
-      const stored = getStoredAccount(account.email);
-      saveAccountToRegistry({
-        ...nextAccount,
-        password: stored?.password,
-      });
-
-      setAccount(nextAccount);
+      const result = await apiUpdateProfile(payload);
+      setAccount(normalizeAccount(result.account));
       setProfileSetupError("");
+    } catch (error) {
+      setProfileSetupError(error instanceof Error ? error.message : "Failed to save profile.");
     } finally {
       setProfileSetupPending(false);
     }
   };
 
-  const updateProfile = (event: FormEvent<HTMLFormElement>) => {
+  const updateProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!account) return;
 
     const data = new FormData(event.currentTarget);
-    const stored = getStoredAccount(account.email);
-    const nextAccount = normalizeAccount({
-      ...account,
-      name: String(data.get("name") || ""),
-      email: String(data.get("email") || account.email),
-      studioName: String(data.get("studioName") || ""),
-      phone: String(data.get("phone") || ""),
-      location: String(data.get("location") || ""),
-      tagline: String(data.get("tagline") || ""),
-    });
-
-    if (account.role === "owner" && account.workspaceId) {
-      syncWorkspaceProfile(account.workspaceId, {
-        studioName: nextAccount.studioName,
-        phone: nextAccount.phone,
-        location: nextAccount.location,
-        tagline: nextAccount.tagline,
+    try {
+      const result = await apiUpdateProfile({
+        name: String(data.get("name") || ""),
+        email: String(data.get("email") || account.email),
+        studioName: String(data.get("studioName") || ""),
+        phone: String(data.get("phone") || ""),
+        location: String(data.get("location") || ""),
+        tagline: String(data.get("tagline") || ""),
       });
+      const nextAccount = normalizeAccount(result.account);
+      setAccount(nextAccount);
+      setRole(nextAccount.role);
+    } catch (error) {
+      console.error(error);
     }
-
-    saveAccountToRegistry({
-      ...nextAccount,
-      password: stored?.password,
-    });
-
-    setAccount(nextAccount);
-    setRole(nextAccount.role);
   };
 
-  const signOut = () => {
-    window.localStorage.removeItem(accountKey);
+  const signOut = async () => {
+    await apiLogout();
     setAccount(null);
     router.push("/");
   };
@@ -423,7 +391,16 @@ export default function DashboardPage() {
   const showStudioProfileSetup = account && !isStudioProfileComplete(account);
 
   if (!loaded || !account) {
-    return null;
+    return (
+      <main className="auth-shell auth-shell--loading">
+        <div className="auth-loading">
+          <span className="auth-loading__mark" aria-hidden>
+            WS
+          </span>
+          <p>{loaded ? "Redirecting to sign in…" : "Loading your studio…"}</p>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -543,7 +520,12 @@ export default function DashboardPage() {
         )}
         {view === "reports" && role === "owner" && <Reports stats={stats} store={store} />}
         {view === "profile" && (
-          <ProfileSettings account={account} manager={getWorkspaceManager(account.workspaceId)} onSave={updateProfile} />
+          <ProfileSettings
+            account={account}
+            manager={workspaceTeam.manager}
+            owner={workspaceTeam.owner}
+            onSave={updateProfile}
+          />
         )}
       </section>
     </main>
@@ -554,10 +536,12 @@ export default function DashboardPage() {
 function ProfileSettings({
   account,
   manager,
+  owner,
   onSave,
 }: {
   account: Account;
-  manager: ReturnType<typeof getWorkspaceManager>;
+  manager: Account | null;
+  owner: Account | null;
   onSave: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isOwner = account.role === "owner";
@@ -572,7 +556,7 @@ function ProfileSettings({
             <h3>Dashboard access</h3>
             <div className="team-access__row">
               <span>Owner</span>
-              <strong>{account.role === "owner" ? account.email : getOwnerAccount(account.workspaceId)?.email || "—"}</strong>
+              <strong>{account.role === "owner" ? account.email : owner?.email || "—"}</strong>
             </div>
             <div className="team-access__row">
               <span>Manager</span>

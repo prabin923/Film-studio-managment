@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Workspace {
+  id         String   @id
+  studioName String
+  phone      String   @default("")
+  location   String   @default("")
+  tagline    String   @default("")
+  ownerEmail String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  accounts  Account[]
+  clients   Client[]
+  expenses  Expense[]
+  staff     StaffRecord[]
+  inventory InventoryItem[]
+  rentals   Rental[]
+}
+
+model Account {
+  id           String   @id
+  workspaceId  String
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model Client {
+  id             String   @id
+  workspaceId    String
+  name           String
+  phone          String   @default("")
+  projectType    String
+  eventDate      String
+  createdAt      String
+  location       String   @default("")
+  packageAmount  Int
+  paidAmount     Int
+  paymentStatus  String
+  assignedStaff  String   @default("")
+  status         String
+  notes          String   @default("")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model Expense {
+  id          String @id
+  workspaceId String
+  date        String
+  category    String
+  vendor      String @default("")
+  amount      Int
+  notes       String @default("")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model StaffRecord {
+  id            String @id
+  workspaceId   String
+  name          String
+  role          String
+  monthlySalary Int
+  advance       Int
+  deduction     Int
+  status        String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("staff")
+}
+
+model InventoryItem {
+  id          String @id
+  workspaceId String
+  name        String
+  category    String
+  serial      String @default("")
+  condition   String @default("")
+  dayRate     Int
+  status      String
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model Rental {
+  id              String @id
+  workspaceId     String
+  renter          String
+  phone           String @default("")
+  itemId          String
+  startDate       String
+  endDate         String
+  deposit         Int
+  amount          Int
+  paidAmount      Int
+  status          String
+  returnCondition String @default("")
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}

@@ -10,11 +10,56 @@ const STATS = [
   { value: "0", label: "Cloud required", detail: "Runs in your browser on this device" },
 ] as const;
 
+function FeatureIcon({ name }: { name: string }) {
+  const icons: Record<string, JSX.Element> = {
+    clients: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" />
+      </svg>
+    ),
+    payroll: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+        <rect x="2" y="5" width="20" height="14" rx="2" />
+        <path d="M2 10h20" />
+        <path d="M6 15h2" strokeLinecap="round" />
+      </svg>
+    ),
+    gear: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+        <path d="M14.5 4h-5L7 7H4v10h3l2.5 3h5l2.5-3H20V7h-3l-2.5-3z" strokeLinejoin="round" />
+        <circle cx="12" cy="12" r="3.25" />
+      </svg>
+    ),
+    rentals: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+        <path d="M8 2v4M16 2v4" strokeLinecap="round" />
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" strokeLinecap="round" />
+      </svg>
+    ),
+    expenses: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinejoin="round" />
+        <path d="M14 2v6h6M8 13h8M8 17h5" strokeLinecap="round" />
+      </svg>
+    ),
+    reports: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  };
+  return icons[name] ?? icons.clients;
+}
+
 const FEATURES = [
   {
     title: "Clients & projects",
     description: "Every wedding booking becomes a living project card — not a scattered spreadsheet row.",
     tone: "indigo",
+    icon: "clients",
     bullets: [
       "Package value, deposits, and paid vs due balances",
       "Project status from booked through delivered",
@@ -26,6 +71,7 @@ const FEATURES = [
     title: "Payroll",
     description: "Know what you owe the team before month-end surprises.",
     tone: "violet",
+    icon: "payroll",
     bullets: [
       "Monthly salary with advances and deductions",
       "Pending vs paid at a glance",
@@ -37,6 +83,7 @@ const FEATURES = [
     title: "Gear inventory",
     description: "Your kit list with availability that updates when gear goes out on rental.",
     tone: "pink",
+    icon: "gear",
     bullets: [
       "Serial numbers, condition, and day rates",
       "Available, rented, or maintenance status",
@@ -48,6 +95,7 @@ const FEATURES = [
     title: "Rentals",
     description: "Multi-item rental bookings with deposits split fairly across gear lines.",
     tone: "amber",
+    icon: "rentals",
     bullets: [
       "Add several gear lines in one booking",
       "Deposit on first row, balance tracked per rental",
@@ -59,6 +107,7 @@ const FEATURES = [
     title: "Expenses",
     description: "Operating costs logged against the same ledger as your income.",
     tone: "teal",
+    icon: "expenses",
     bullets: [
       "Category, vendor, and date on every entry",
       "Feeds month-wise net reports",
@@ -70,6 +119,7 @@ const FEATURES = [
     title: "Reports & charts",
     description: "See trends instead of guessing from memory at tax time.",
     tone: "blue",
+    icon: "reports",
     bullets: [
       "Colorful revenue chart — client vs rental pay",
       "Clients onboarded per month",
@@ -299,8 +349,15 @@ export function LandingPage() {
               className={`landing-feature landing-feature--${feature.tone} landing-reveal`}
               style={{ transitionDelay: `${(index % 3) * 0.08}s` }}
             >
+              <div className="landing-feature__glow" aria-hidden />
+              <div className="landing-feature__head">
+                <span className="landing-feature__icon">
+                  <FeatureIcon name={feature.icon} />
+                </span>
+                <span className="landing-feature__tag">Module</span>
+              </div>
               <h3>{feature.title}</h3>
-              <p>{feature.description}</p>
+              <p className="landing-feature__desc">{feature.description}</p>
               <ul className="landing-feature__list">
                 {feature.bullets.map((bullet) => (
                   <li key={bullet}>{bullet}</li>
@@ -393,7 +450,7 @@ export function LandingPage() {
         </ol>
       </section>
 
-      <section id="faq" className="landing-section landing-section--muted landing-reveal">
+      <section id="faq" className="landing-section landing-section--muted landing-section--center landing-reveal">
         <div className="landing-section__head">
           <p className="landing-eyebrow">Questions</p>
           <h2>Before you sign up</h2>

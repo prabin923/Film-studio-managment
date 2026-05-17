@@ -25,10 +25,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={sans.variable}>
-      <head>
-        {/* eslint-disable-next-line @next/next/no-css-tags -- fallback when dev CSS bundle fails */}
-        <link rel="stylesheet" href="/globals.css" />
-      </head>
       <body className={sans.className}>{children}</body>
     </html>
   );
