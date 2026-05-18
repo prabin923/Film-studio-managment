@@ -7,6 +7,7 @@ import { AnalyticsCharts } from "../components/analytics-charts";
 import { MonthlyReports } from "../components/monthly-reports";
 import { NewRentalPayload, RentalForm } from "../components/rental-form";
 import { StudioProfileCard, StudioProfileSetup } from "../components/studio-profile";
+import { ThemeToggle } from "../components/theme-toggle";
 import {
   apiGetWorkspaceTeam,
   apiLogout,
@@ -438,6 +439,9 @@ export default function DashboardPage() {
           ))}
         </nav>
         <div className="sidebar-foot">
+          <div className="sidebar-theme">
+            <ThemeToggle />
+          </div>
           <button
             className="profile-chip profile-chip--button"
             type="button"

@@ -6,6 +6,7 @@ import type { RegisterAs } from "../lib/types";
 import { getStoredAccount } from "../lib/accounts";
 import { Field } from "./ui";
 import { ManagerJoinFields, RegisterRolePicker, StudioProfileFields } from "./studio-profile";
+import { ThemeToggle } from "./theme-toggle";
 
 export function AuthScreen({
   mode,
@@ -59,6 +60,9 @@ export function AuthScreen({
       </aside>
 
       <section className="auth-main">
+        <div className="auth-theme-slot">
+          <ThemeToggle />
+        </div>
         <Link href="/" className="auth-home-link">
           ← Back to home
         </Link>

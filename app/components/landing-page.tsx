@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, type CSSProperties } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 const STATS = [
   { value: "6", label: "Core modules", detail: "Clients, payroll, gear, rentals, expenses, reports" },
@@ -236,6 +237,7 @@ export function LandingPage() {
           </span>
         </Link>
         <nav className="landing-nav__links" aria-label="Primary">
+          <ThemeToggle className="landing-nav__theme" />
           <a href="#features">Features</a>
           <a href="#workflows">Workflows</a>
           <a href="#how-it-works">How it works</a>
