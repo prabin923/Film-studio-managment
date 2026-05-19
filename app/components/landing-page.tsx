@@ -252,21 +252,21 @@ export function LandingPage() {
       <section className="landing-hero">
         <div className="landing-hero__copy">
           <p className="landing-eyebrow landing-hero__anim" style={{ animationDelay: "0.05s" }}>
-            Built for wedding film studios
+            Wedding film studio operations
           </p>
           <h1 className="landing-hero__anim" style={{ animationDelay: "0.12s" }}>
-            Your studio ledger —
+            Run your studio
             <br />
-            clients, crew, gear &amp; cash.
+            with clarity.
           </h1>
           <p className="landing-lead landing-hero__anim" style={{ animationDelay: "0.2s" }}>
-            WedStudio OS is an operations ledger for wedding film teams in Nepal and beyond. Track every
-            project payment, crew payout, gear rental, and operating expense on one calm dashboard — with
-            owner and manager roles sharing a single workspace from separate emails.
+            A refined operations ledger for wedding film teams — clients, crew payroll, gear inventory,
+            rentals, and cash flow in one calm workspace. Owners and managers collaborate securely from
+            separate accounts.
           </p>
           <div className="landing-hero__actions landing-hero__anim" style={{ animationDelay: "0.28s" }}>
             <Link href="/login?mode=register" className="btn btn--primary landing-hero__btn">
-              Start free on this device
+              Get started free
             </Link>
             <Link href="/login" className="btn btn--secondary landing-hero__btn">
               Log in
