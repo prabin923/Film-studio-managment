@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      { source: "/register", destination: "/login?mode=register", permanent: false },
+      { source: "/signup", destination: "/login?mode=register", permanent: false },
+      { source: "/signin", destination: "/login", permanent: false },
+      { source: "/sign-in", destination: "/login", permanent: false },
+      { source: "/app", destination: "/dashboard", permanent: false },
+      { source: "/home", destination: "/", permanent: false },
+    ];
+  },
   webpack(config, { dev }) {
     if (dev) {
       config.watchOptions = {

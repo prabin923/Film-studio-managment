@@ -2447,6 +2447,13 @@ a.btn--secondary {
   place-items: center;
   padding: 24px;
   background: var(--bg);
+  position: relative;
+}
+
+.error-page__theme {
+  position: absolute;
+  top: 20px;
+  right: 20px;
 }
 
 .error-page__card {
@@ -2467,7 +2474,7 @@ a.btn--secondary {
   margin-bottom: 16px;
   border-radius: var(--radius);
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -2482,7 +2489,19 @@ a.btn--secondary {
   font-size: 0.88rem;
   color: var(--text-secondary);
   line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.error-page__hint {
+  font-size: 0.84rem;
+  color: var(--text-tertiary);
+  line-height: 1.5;
   margin-bottom: 20px;
+}
+
+.error-page__hint a {
+  color: var(--text);
+  font-weight: 500;
 }
 
 .error-page__actions {

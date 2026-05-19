@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
-import { Source_Sans_3 } from "next/font/google";
+import { DM_Sans, Fraunces } from "next/font/google";
+import { ThemeInitScript } from "./components/theme-init-script";
 import { ThemeProvider } from "./components/theme-provider";
 import "./globals.css";
 
-const sans = Source_Sans_3({
+const sans = DM_Sans({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
+});
+
+const display = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display",
 });
 
 export const metadata: Metadata = {
@@ -25,7 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={sans.variable} suppressHydrationWarning>
+    <html lang="en" className={`${sans.variable} ${display.variable}`} suppressHydrationWarning>
+      <head>
+        <ThemeInitScript />
+      </head>
       <body className={sans.className}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
