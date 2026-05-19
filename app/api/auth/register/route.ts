@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 import { registerAccount } from "@/lib/server/auth";
-import { setSessionCookie } from "@/lib/server/session";
+import { applySessionCookie } from "@/lib/server/session";
 import type { RegisterAs } from "@/app/lib/types";
 
 export async function POST(request: Request) {
@@ -26,13 +26,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    setSessionCookie({
+    const response = NextResponse.json({ account: result.account, store: result.store });
+    applySessionCookie(response, {
       email: result.account.email,
       workspaceId: result.account.workspaceId,
       role: result.account.role,
     });
-
-    return NextResponse.json({ account: result.account, store: result.store });
+    return response;
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Registration failed. Check DATABASE_URL and run db:push." }, { status: 500 });

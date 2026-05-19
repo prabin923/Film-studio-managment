@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 import { loginWithPassword } from "@/lib/server/auth";
-import { setSessionCookie } from "@/lib/server/session";
+import { applySessionCookie } from "@/lib/server/session";
 
 export async function POST(request: Request) {
   try {
@@ -19,13 +19,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 401 });
     }
 
-    setSessionCookie({
+    const response = NextResponse.json({ account: result.account, store: result.store });
+    applySessionCookie(response, {
       email: result.account.email,
       workspaceId: result.account.workspaceId,
       role: result.account.role,
     });
-
-    return NextResponse.json({ account: result.account, store: result.store });
+    return response;
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Login failed. Check DATABASE_URL and run db:push." }, { status: 500 });

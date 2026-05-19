@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ExpenseCard, InventoryCard, RentalCard, StaffCard } from "../components/ledger-cards";
+import { AdminDashboardHome } from "../components/admin-dashboard";
 import { AnalyticsCharts } from "../components/analytics-charts";
 import { MonthlyReports } from "../components/monthly-reports";
 import { NewRentalPayload, RentalForm } from "../components/rental-form";
@@ -22,7 +23,6 @@ import {
   EmptyState,
   Field,
   FormPanel,
-  MetricTile,
   PageHeader,
   Panel,
   PanelHead,
@@ -415,7 +415,7 @@ export default function DashboardPage() {
         />
       ) : null}
 
-      <main className={`app-shell${showStudioProfileSetup ? " app-shell--dimmed" : ""}`}>
+      <main className={`app-shell app-shell--admin${showStudioProfileSetup ? " app-shell--dimmed" : ""}`}>
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark" aria-hidden>
@@ -461,18 +461,20 @@ export default function DashboardPage() {
       </aside>
 
       <section className="main">
-        <PageHeader
-          title={copy.title}
-          description={copy.description}
-          action={
-            <button className="btn btn--secondary" type="button" onClick={() => setStore(seed)}>
-              Reset demo
-            </button>
-          }
-        />
+        {view !== "dashboard" ? (
+          <PageHeader
+            title={copy.title}
+            description={copy.description}
+            action={
+              <button className="btn btn--secondary" type="button" onClick={() => setStore(seed)}>
+                Reset demo
+              </button>
+            }
+          />
+        ) : null}
 
         {view === "dashboard" && (
-          <Dashboard
+          <AdminDashboardHome
             stats={stats}
             store={store}
             setView={setView}
@@ -603,97 +605,6 @@ function ProfileSettings({
   );
 }
 
-function Dashboard({
-  stats,
-  store,
-  setView,
-  role,
-  updateClientStatus,
-  updateClientPaymentStatus,
-}: {
-  stats: Stats;
-  store: Store;
-  setView: (view: View) => void;
-  role: Role;
-  updateClientStatus: (clientId: string, status: ProjectStatus) => void;
-  updateClientPaymentStatus: (clientId: string, status: ProjectPaymentStatus) => void;
-}) {
-  const activeRentals = store.rentals.filter((rental) => rental.status !== "Returned");
-
-  return (
-    <div className="stack">
-      <section className="metrics-row">
-        <MetricTile label="Active projects" value={String(stats.activeProjects)} />
-        <MetricTile label="Active rentals" value={String(stats.activeRentals)} />
-        <MetricTile label="Client balance due" value={money(stats.clientDue)} />
-        <MetricTile
-          label={role === "owner" ? "Net cash recorded" : "Available gear"}
-          value={role === "owner" ? money(stats.netCash) : String(stats.availableItems)}
-        />
-      </section>
-
-      {role === "owner" ? <AnalyticsCharts store={store} /> : null}
-
-      <SplitLayout
-        main={
-          <Panel>
-            <PanelHead
-              title="Upcoming work"
-              description="Shoots and edits in progress."
-              action={
-                <button className="btn btn--ghost" type="button" onClick={() => setView("clients")}>
-                  View all
-                </button>
-              }
-            />
-            <div className="project-list">
-              {store.clients.map((client) => (
-                <ProjectCard
-                  compact
-                  key={client.id}
-                  client={client}
-                  onStatusChange={(status) => updateClientStatus(client.id, status)}
-                  onPaymentStatusChange={(status) => updateClientPaymentStatus(client.id, status)}
-                />
-              ))}
-            </div>
-          </Panel>
-        }
-        aside={
-          <Panel>
-            <PanelHead
-              title="Rentals out"
-              description="Gear currently reserved or with a client."
-              action={
-                <button className="btn btn--ghost" type="button" onClick={() => setView("rentals")}>
-                  View all
-                </button>
-              }
-            />
-            {activeRentals.length === 0 ? (
-              <EmptyState>No active rentals.</EmptyState>
-            ) : (
-              <div className="simple-list">
-                {activeRentals.map((rental) => (
-                  <div className="simple-list__item" key={rental.id}>
-                    <strong>{store.inventory.find((item) => item.id === rental.itemId)?.name || "Unknown item"}</strong>
-                    <span>
-                      {rental.renter} · {rental.startDate} – {rental.endDate}
-                    </span>
-                    <div className="row">
-                      <Badge tone={statusTone(rental.status)}>{rental.status}</Badge>
-                      <Badge tone="neutral">Due {money(rental.amount - rental.paidAmount)}</Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Panel>
-        }
-      />
-    </div>
-  );
-}
 
 function Clients({
   store,

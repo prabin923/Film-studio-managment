@@ -1,6 +1,9 @@
 import { cookies } from "next/headers";
+import type { NextResponse } from "next/server";
 
 export const SESSION_COOKIE = "wedstudio_session";
+
+const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 
 export type SessionPayload = {
   email: string;
@@ -21,14 +24,24 @@ export async function getSession(): Promise<SessionPayload | null> {
   }
 }
 
-export function setSessionCookie(payload: SessionPayload) {
-  cookies().set(SESSION_COOKIE, JSON.stringify(payload), {
+function sessionCookieOptions() {
+  return {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
-  });
+    maxAge: SESSION_MAX_AGE,
+  };
+}
+
+/** Prefer this in route handlers so Set-Cookie is on the returned response. */
+export function applySessionCookie(response: NextResponse, payload: SessionPayload) {
+  response.cookies.set(SESSION_COOKIE, JSON.stringify(payload), sessionCookieOptions());
+  return response;
+}
+
+export function setSessionCookie(payload: SessionPayload) {
+  cookies().set(SESSION_COOKIE, JSON.stringify(payload), sessionCookieOptions());
 }
 
 export function clearSessionCookie() {

@@ -1,48 +1,25 @@
 "use client";
 
-import { FormEvent, Suspense, useCallback, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AuthScreen } from "../components/auth-screen";
 import { apiLogin, apiMe, apiRegister } from "../lib/api-client";
 import type { AuthMode, RegisterAs } from "../lib/types";
 
-function AuthLoading() {
-  return (
-    <main className="auth-shell auth-shell--loading">
-      <div className="auth-loading">
-        <span className="auth-loading__mark" aria-hidden>
-          WS
-        </span>
-        <p>Loading…</p>
-      </div>
-    </main>
-  );
+function readAuthModeFromUrl(): AuthMode {
+  if (typeof window === "undefined") return "login";
+  return new URLSearchParams(window.location.search).get("mode") === "register" ? "register" : "login";
 }
 
-function LoginPageContent() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const modeParam = searchParams.get("mode") === "register" ? "register" : "login";
-
-  const [authMode, setAuthMode] = useState<AuthMode>(modeParam);
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authError, setAuthError] = useState("");
   const [authPending, setAuthPending] = useState(false);
-  const [checking, setChecking] = useState(true);
-
-  const switchMode = useCallback(
-    (next: AuthMode) => {
-      setAuthMode(next);
-      setAuthError("");
-      router.replace(next === "register" ? "/login?mode=register" : "/login", { scroll: false });
-    },
-    [router],
-  );
 
   useEffect(() => {
-    setAuthMode(modeParam);
-  }, [modeParam]);
+    setAuthMode(readAuthModeFromUrl());
 
-  useEffect(() => {
     let cancelled = false;
 
     apiMe()
@@ -50,13 +27,29 @@ function LoginPageContent() {
         if (!cancelled) router.replace("/dashboard");
       })
       .catch(() => {
-        if (!cancelled) setChecking(false);
+        /* not signed in — show login form */
       });
+
+    const onPopState = () => {
+      if (!cancelled) setAuthMode(readAuthModeFromUrl());
+    };
+    window.addEventListener("popstate", onPopState);
 
     return () => {
       cancelled = true;
+      window.removeEventListener("popstate", onPopState);
     };
   }, [router]);
+
+  const switchMode = useCallback(
+    (next: AuthMode) => {
+      setAuthMode(next);
+      setAuthError("");
+      const path = next === "register" ? "/login?mode=register" : "/login";
+      router.replace(path, { scroll: false });
+    },
+    [router],
+  );
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -130,10 +123,6 @@ function LoginPageContent() {
     }
   };
 
-  if (checking) {
-    return <AuthLoading />;
-  }
-
   return (
     <AuthScreen
       mode={authMode}
@@ -143,13 +132,5 @@ function LoginPageContent() {
       error={authError}
       pending={authPending}
     />
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<AuthLoading />}>
-      <LoginPageContent />
-    </Suspense>
   );
 }
