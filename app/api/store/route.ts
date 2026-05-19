@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { getSession } from "@/lib/server/session";
 import { loadStore, saveStore } from "@/lib/server/store";
 import type { Store } from "@/app/lib/types";

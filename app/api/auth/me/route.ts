@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { getAccountByEmail } from "@/lib/server/auth";
 import { getSession } from "@/lib/server/session";
 import { loadStore } from "@/lib/server/store";

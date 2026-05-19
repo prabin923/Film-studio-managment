@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/server/session";
 import { accountFromWorkspaceRow } from "@/lib/server/store";

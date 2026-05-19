@@ -1,12 +1,8 @@
 import Link from "next/link";
-import { ThemeToggle } from "./components/theme-toggle";
 
 export default function NotFound() {
   return (
     <main className="error-page">
-      <div className="error-page__theme">
-        <ThemeToggle />
-      </div>
       <div className="error-page__card">
         <span className="error-page__mark" aria-hidden>
           WS

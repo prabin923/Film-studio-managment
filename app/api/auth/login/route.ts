@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { loginWithPassword } from "@/lib/server/auth";
 import { setSessionCookie } from "@/lib/server/session";
 

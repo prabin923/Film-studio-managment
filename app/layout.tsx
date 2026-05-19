@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { DM_Sans, Fraunces } from "next/font/google";
-import { ThemeInitScript } from "./components/theme-init-script";
 import { ThemeProvider } from "./components/theme-provider";
+import { THEME_STORAGE_KEY } from "./lib/theme";
 import "./globals.css";
+
+const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
 
 const sans = DM_Sans({
   subsets: ["latin"],
@@ -33,10 +36,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${sans.variable} ${display.variable}`} suppressHydrationWarning>
-      <head>
-        <ThemeInitScript />
-      </head>
       <body className={sans.className}>
+        <Script id="theme-init" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

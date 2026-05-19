@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { registerAccount } from "@/lib/server/auth";
 import { setSessionCookie } from "@/lib/server/session";
 import type { RegisterAs } from "@/app/lib/types";

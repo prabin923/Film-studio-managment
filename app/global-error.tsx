@@ -16,26 +16,38 @@ export default function GlobalError({
           display: "grid",
           placeItems: "center",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
-          background: "#f5f4f1",
-          color: "#171717",
+          background: "#fafaf9",
+          color: "#0f172a",
+          padding: 24,
         }}
       >
-        <div style={{ maxWidth: 400, padding: 24, textAlign: "center" }}>
+        <div
+          style={{
+            maxWidth: 400,
+            padding: 32,
+            textAlign: "center",
+            background: "#fff",
+            border: "1px solid #e7e5e4",
+            borderRadius: 16,
+            boxShadow: "0 12px 32px rgba(15, 23, 42, 0.08)",
+          }}
+        >
           <h1 style={{ fontSize: "1.25rem", marginBottom: 8 }}>WedStudio OS</h1>
-          <p style={{ color: "#525252", marginBottom: 20 }}>
+          <p style={{ color: "#64748b", marginBottom: 20, lineHeight: 1.5 }}>
             {error.message || "A critical error occurred."}
           </p>
           <button
             type="button"
             onClick={() => reset()}
             style={{
-              padding: "8px 16px",
-              borderRadius: 6,
+              padding: "10px 18px",
+              borderRadius: 12,
               border: "none",
-              background: "#171717",
+              background: "linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%)",
               color: "#fff",
               cursor: "pointer",
               fontSize: "0.9rem",
+              fontWeight: 600,
             }}
           >
             Try again
