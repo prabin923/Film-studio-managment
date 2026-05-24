@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 import { loginWithPassword } from "@/lib/server/auth";
+import { databaseErrorMessage } from "@/lib/server/db-error";
 import { applySessionCookie } from "@/lib/server/session";
 
 export async function POST(request: Request) {
@@ -28,6 +29,6 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Login failed. Check DATABASE_URL and run db:push." }, { status: 500 });
+    return NextResponse.json({ error: databaseErrorMessage(error) }, { status: 500 });
   }
 }

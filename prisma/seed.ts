@@ -2,10 +2,11 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
 import { seed } from "../app/lib/seed";
+import { getDatabaseUrl } from "../lib/database-url";
 import { hashPassword } from "../lib/server/password";
 
 const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL!,
+  connectionString: getDatabaseUrl(),
 });
 
 const prisma = new PrismaClient({ adapter });
