@@ -1361,7 +1361,6 @@ a.btn--secondary {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  animation: auth-pulse 1.4s ease-in-out infinite;
 }
 
 @keyframes auth-pulse {
@@ -1374,6 +1373,12 @@ a.btn--secondary {
     opacity: 0.85;
     transform: scale(0.96);
   }
+}
+
+.auth-aside,
+.auth-main,
+.auth-card {
+  opacity: 0;
 }
 
 .auth-aside {
@@ -2832,39 +2837,24 @@ a.btn--secondary {
 }
 
 .landing-nav--animate {
-  animation: landing-nav-in 0.5s ease forwards;
+  opacity: 0;
 }
 
 .landing-hero__anim {
   opacity: 0;
-  animation: landing-fade-up 0.75s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.landing-preview--float {
-  animation: landing-float 5s ease-in-out infinite;
 }
 
 .landing-preview__bar-col--animate {
   height: 0;
   align-self: flex-end;
-  animation: landing-bar-rise 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.landing-preview__metric--pulse {
-  animation: landing-metric-pulse 2.4s ease-in-out infinite;
 }
 
 .landing-reveal {
   opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .landing-reveal.is-visible {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .landing-stats {
@@ -2877,19 +2867,16 @@ a.btn--secondary {
 }
 
 .landing-stat {
+  opacity: 0;
   padding: 24px 20px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xs);
-  transition:
-    opacity 0.6s ease,
-    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.landing-stats.landing-reveal.is-visible .landing-stat {
+.landing-stats.is-visible .landing-stat {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .landing-stat__value {
@@ -3128,22 +3115,22 @@ a.btn--secondary {
 @media (prefers-reduced-motion: reduce) {
   .landing-hero__anim,
   .landing-nav--animate,
-  .landing-preview--float,
-  .landing-preview__bar-col--animate,
-  .landing-preview__metric--pulse {
-    animation: none;
+  .landing-reveal,
+  .landing-stat,
+  .landing-preview__bar-col--animate {
     opacity: 1;
     transform: none;
-  }
-
-  .landing-reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
   }
 
   .landing-preview__bar-col--animate {
     height: var(--bar-height);
+  }
+
+  .auth-aside,
+  .auth-main,
+  .auth-card {
+    opacity: 1;
+    transform: none;
   }
 
   .landing-feature:hover {

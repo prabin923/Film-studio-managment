@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { AuthLoadingMark } from "../components/auth-loading-mark";
 import { useRouter } from "next/navigation";
 import { ExpenseCard, InventoryCard, RentalCard, StaffCard } from "../components/ledger-cards";
 import { AdminDashboardHome } from "../components/admin-dashboard";
@@ -395,9 +396,7 @@ export default function DashboardPage() {
     return (
       <main className="auth-shell auth-shell--loading">
         <div className="auth-loading">
-          <span className="auth-loading__mark" aria-hidden>
-            WS
-          </span>
+          <AuthLoadingMark />
           <p>{loaded ? "Redirecting to sign in…" : "Loading your studio…"}</p>
         </div>
       </main>

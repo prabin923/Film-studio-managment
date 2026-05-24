@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
+import { initLandingAnimations } from "../lib/anime-motion";
 import { ThemeToggle } from "./theme-toggle";
 
 const STATS = [
@@ -198,34 +199,16 @@ const PREVIEW_BARS = [
 ] as const;
 
 export function LandingPage() {
+  const rootRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const nodes = document.querySelectorAll(".landing-reveal");
-    if (!nodes.length) return;
-
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      nodes.forEach((node) => node.classList.add("is-visible"));
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -32px 0px" },
-    );
-
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+    const root = rootRef.current;
+    if (!root) return;
+    return initLandingAnimations(root);
   }, []);
 
   return (
-    <div className="landing">
+    <div className="landing" ref={rootRef}>
       <header className="landing-nav landing-nav--animate">
         <Link href="/" className="landing-brand">
           <span className="landing-brand__mark" aria-hidden>
@@ -251,20 +234,18 @@ export function LandingPage() {
 
       <section className="landing-hero">
         <div className="landing-hero__copy">
-          <p className="landing-eyebrow landing-hero__anim" style={{ animationDelay: "0.05s" }}>
-            Wedding film studio operations
-          </p>
-          <h1 className="landing-hero__anim" style={{ animationDelay: "0.12s" }}>
+          <p className="landing-eyebrow landing-hero__anim">Wedding film studio operations</p>
+          <h1 className="landing-hero__anim">
             Run your studio
             <br />
             with clarity.
           </h1>
-          <p className="landing-lead landing-hero__anim" style={{ animationDelay: "0.2s" }}>
+          <p className="landing-lead landing-hero__anim">
             A refined operations ledger for wedding film teams — clients, crew payroll, gear inventory,
             rentals, and cash flow in one calm workspace. Owners and managers collaborate securely from
             separate accounts.
           </p>
-          <div className="landing-hero__actions landing-hero__anim" style={{ animationDelay: "0.28s" }}>
+          <div className="landing-hero__actions landing-hero__anim">
             <Link href="/login?mode=register" className="btn btn--primary landing-hero__btn">
               Get started free
             </Link>
@@ -272,7 +253,7 @@ export function LandingPage() {
               Log in
             </Link>
           </div>
-          <ul className="landing-hero__points landing-hero__anim" style={{ animationDelay: "0.36s" }}>
+          <ul className="landing-hero__points landing-hero__anim">
             <li>No cloud setup — data stays in your browser</li>
             <li>NPR amounts with paisa precision</li>
             <li>Colorful revenue &amp; onboarding charts</li>
@@ -280,7 +261,7 @@ export function LandingPage() {
           </ul>
         </div>
 
-        <div className="landing-hero__preview landing-hero__anim" style={{ animationDelay: "0.18s" }} aria-hidden>
+        <div className="landing-hero__preview landing-hero__anim" aria-hidden>
           <div className="landing-preview landing-preview--float">
             <div className="landing-preview__bar">
               <span className="landing-preview__dot" />
@@ -306,12 +287,7 @@ export function LandingPage() {
                     <div
                       key={index}
                       className={`landing-preview__bar-col landing-preview__bar-col--animate ${bar.className}`.trim()}
-                      style={
-                        {
-                          "--bar-height": bar.height,
-                          animationDelay: `${0.45 + index * 0.08}s`,
-                        } as CSSProperties
-                      }
+                      style={{ "--bar-height": bar.height } as CSSProperties}
                     />
                   ))}
                 </div>

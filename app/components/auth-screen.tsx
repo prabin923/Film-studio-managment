@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import type { RegisterAs } from "../lib/types";
 import { getStoredAccount } from "../lib/accounts";
+import { animateAuthCard, initAuthAnimations } from "../lib/anime-motion";
 import { Field } from "./ui";
 import { ManagerJoinFields, RegisterRolePicker, StudioProfileFields } from "./studio-profile";
 import { ThemeToggle } from "./theme-toggle";
@@ -26,6 +27,20 @@ export function AuthScreen({
   const isRegister = mode === "register";
   const [registerAs, setRegisterAs] = useState<RegisterAs>("owner");
   const [studioHint, setStudioHint] = useState("");
+  const shellRef = useRef<HTMLElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = shellRef.current;
+    if (!root) return;
+    return initAuthAnimations(root);
+  }, []);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    return animateAuthCard(card);
+  }, [mode, registerAs]);
 
   function switchMode(next: "login" | "register") {
     onSwitchMode(next);
@@ -43,7 +58,7 @@ export function AuthScreen({
   }
 
   return (
-    <main className="auth-shell">
+    <main className="auth-shell" ref={shellRef}>
       <aside className="auth-aside">
         <div>
           <p className="auth-kicker">WedStudio OS</p>
@@ -79,7 +94,7 @@ export function AuthScreen({
           </button>
         </div>
 
-        <div className="auth-card">
+        <div className="auth-card" ref={cardRef}>
           {isRegister ? (
             <form
               className="auth-form"
