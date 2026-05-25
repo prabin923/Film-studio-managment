@@ -200,7 +200,171 @@ function playReveal(target: Element, played: WeakSet<Element>) {
   });
 }
 
+function playMercuryReveal(target: Element, played: WeakSet<Element>) {
+  if (played.has(target)) return;
+  played.add(target);
+  target.classList.add("is-visible");
+
+  if (target.classList.contains("m-stats")) {
+    animate(target.querySelectorAll(".m-stat"), {
+      opacity: [0, 1],
+      y: [32, 0],
+      scale: [0.9, 1],
+      duration: 700,
+      delay: stagger(80, { from: "center" }),
+      ease: "out(4)",
+    });
+    target.querySelectorAll<HTMLElement>(".m-stat__value[data-count-target]").forEach(
+      (el, i) => setTimeout(() => animateCount(el), i * 100),
+    );
+    return;
+  }
+
+  if (target.classList.contains("m-workflows")) {
+    animate(target.querySelectorAll(".m-workflow-card"), {
+      opacity: [0, 1],
+      y: [40, 0],
+      scale: [0.92, 1],
+      duration: 720,
+      delay: stagger(100),
+      ease: "out(4)",
+    });
+    return;
+  }
+
+  if (target.classList.contains("m-steps")) {
+    animate(target.querySelectorAll(".m-step"), {
+      opacity: [0, 1],
+      y: [24, 0],
+      scale: [0.96, 1],
+      duration: 620,
+      delay: stagger(90),
+      ease: "out(4)",
+    });
+    return;
+  }
+
+  if (target.classList.contains("m-trust")) {
+    animate(target.querySelectorAll(".m-trust__item"), {
+      opacity: [0, 1],
+      y: [20, 0],
+      duration: 580,
+      delay: stagger(80),
+      ease: "out(3)",
+    });
+    return;
+  }
+
+  if (target.classList.contains("m-products")) {
+    animate(target.querySelectorAll(".m-products__item"), {
+      opacity: [0, 1],
+      x: [-16, 0],
+      duration: 600,
+      delay: stagger(70),
+      ease: "out(3)",
+    });
+    const visual = target.querySelector(".m-products__visual");
+    if (visual) {
+      animate(visual, { opacity: [0, 1], scale: [0.94, 1], duration: 800, ease: "out(4)" });
+    }
+    return;
+  }
+
+  animate(target, {
+    opacity: [0, 1],
+    y: [32, 0],
+    scale: [0.96, 1],
+    duration: 700,
+    ease: "out(4)",
+  });
+}
+
+export function initMercuryLandingAnimations(root: HTMLElement): Cleanup {
+  const reduced = prefersReducedMotion();
+
+  if (reduced) {
+    showInstant(root.querySelectorAll(".m-hero__anim, .landing-nav--animate, .m-reveal"));
+    root.classList.add("is-loaded");
+    return () => {};
+  }
+
+  const loops: JSAnimation[] = [];
+  const cleanups: Array<() => void> = [];
+  const played = new WeakSet<Element>();
+
+  const tl = createTimeline({ defaults: { ease: "out(3)" } });
+  const nav = root.querySelector(".landing-nav--animate");
+  if (nav) {
+    tl.add(nav, { opacity: [0, 1], y: [-12, 0], duration: 480 }, 0);
+  }
+
+  const heroItems = root.querySelectorAll(".m-hero__anim");
+  if (heroItems.length) {
+    tl.add(heroItems, { opacity: [0, 1], y: [36, 0], duration: 900, delay: stagger(80) }, 120);
+  }
+
+  setTimeout(() => root.querySelector(".m-hero")?.classList.add("is-loaded"), 500);
+
+  const heroBg = root.querySelector<HTMLElement>(".m-hero__bg [data-parallax]");
+  if (heroBg) {
+    const onScroll = () => {
+      const y = window.scrollY * 0.25;
+      heroBg.style.transform = `translate3d(0, ${y}px, 0) scale(1.05)`;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    cleanups.push(() => window.removeEventListener("scroll", onScroll));
+  }
+
+  const navEl = root.querySelector(".landing-nav");
+  if (navEl) {
+    const onNavScroll = () => {
+      navEl.classList.toggle("is-scrolled", window.scrollY > 24);
+    };
+    window.addEventListener("scroll", onNavScroll, { passive: true });
+    onNavScroll();
+    cleanups.push(() => window.removeEventListener("scroll", onNavScroll));
+  }
+
+  const ctaGlow = root.querySelector(".m-cta-final__glow");
+  if (ctaGlow) {
+    loops.push(
+      animate(ctaGlow, {
+        scale: [1, 1.12, 1],
+        opacity: [0.6, 1, 0.6],
+        duration: 5000,
+        ease: "inOutSine",
+        loop: true,
+      }),
+    );
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          playMercuryReveal(entry.target, played);
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12, rootMargin: "0px 0px -60px 0px" },
+  );
+
+  root.querySelectorAll(".m-reveal").forEach((node) => observer.observe(node));
+  cleanups.push(() => observer.disconnect());
+
+  return () => {
+    tl.pause();
+    loops.forEach((a) => a.pause());
+    cleanups.forEach((fn) => fn());
+  };
+}
+
 export function initLandingAnimations(root: HTMLElement): Cleanup {
+  if (root.classList.contains("landing--mercury")) {
+    return initMercuryLandingAnimations(root);
+  }
   const reduced = prefersReducedMotion();
 
   if (reduced) {

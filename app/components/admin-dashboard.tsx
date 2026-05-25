@@ -11,7 +11,7 @@ import { ProjectCard } from "./project-card";
 
 const PREVIEW_BAR_COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b", "#14b8a6", "#3b82f6"] as const;
 
-function AdminRevenueChart({ store }: { store: Store }) {
+export function AdminRevenueChart({ store }: { store: Store }) {
   const points = useMemo(() => buildRevenueByMonth(store.clients, store.rentals), [store.clients, store.rentals]);
   const peak = Math.max(...points.map((p) => p.value), 1);
   const hasData = points.some((p) => p.value > 0);

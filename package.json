@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "sync-styles": "cp app/globals.css public/globals.css",
-    "dev": "rm -rf .next && npm run sync-styles && next dev",
-    "dev:clean": "npm run dev",
+    "dev": "npm run sync-styles && WATCHPACK_POLLING=true next dev",
+    "dev:clean": "rm -rf .next && npm run sync-styles && next dev",
     "build": "npm run sync-styles && prisma generate && node scripts/migrate-deploy.mjs && next build",
     "start": "next start",
     "lint": "next lint",

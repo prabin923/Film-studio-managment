@@ -2,183 +2,33 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { Inter, Manrope } from "next/font/google";
+import { useEffect, useRef } from "react";
 import { initLandingAnimations } from "../lib/anime-motion";
-import { LANDING_IMAGES } from "../lib/landing-content";
-import { LandingHeroVisual } from "./landing-hero-visual";
-import { LandingMarquee } from "./landing-marquee";
+import {
+  MERCURY_HERO_IMAGE,
+  MERCURY_STATS,
+  MERCURY_STEPS,
+  MERCURY_TRUST,
+} from "../lib/mercury-landing-content";
+import "../mercury-landing.css";
+import { LandingCardStack } from "./landing-card-stack";
+import { LandingHeroDevice } from "./landing-hero-device";
+import { LandingProductTabs } from "./landing-product-tabs";
+import { LandingTestimonials } from "./landing-testimonials";
 import { ThemeToggle } from "./theme-toggle";
 
-const STATS = [
-  { value: "6", label: "Core modules", detail: "Clients, payroll, gear, rentals, expenses, reports" },
-  { value: "2", label: "Team roles", detail: "Owner and manager on one workspace" },
-  { value: "NPR", label: "Local currency", detail: "Amounts stored in paisa for accuracy" },
-  { value: "1", label: "Shared workspace", detail: "Owner and manager on secure cloud data" },
-] as const;
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
-function FeatureIcon({ name }: { name: string }) {
-  const icons: Record<string, JSX.Element> = {
-    clients: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" />
-      </svg>
-    ),
-    payroll: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-        <rect x="2" y="5" width="20" height="14" rx="2" />
-        <path d="M2 10h20" />
-        <path d="M6 15h2" strokeLinecap="round" />
-      </svg>
-    ),
-    gear: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-        <path d="M14.5 4h-5L7 7H4v10h3l2.5 3h5l2.5-3H20V7h-3l-2.5-3z" strokeLinejoin="round" />
-        <circle cx="12" cy="12" r="3.25" />
-      </svg>
-    ),
-    rentals: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-        <path d="M8 2v4M16 2v4" strokeLinecap="round" />
-        <rect x="3" y="4" width="18" height="18" rx="2" />
-        <path d="M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" strokeLinecap="round" />
-      </svg>
-    ),
-    expenses: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinejoin="round" />
-        <path d="M14 2v6h6M8 13h8M8 17h5" strokeLinecap="round" />
-      </svg>
-    ),
-    reports: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
-        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  };
-  return icons[name] ?? icons.clients;
-}
-
-const FEATURES = [
-  {
-    title: "Clients & projects",
-    description: "Every wedding booking becomes a living project card — not a scattered spreadsheet row.",
-    tone: "indigo",
-    icon: "clients",
-    bullets: [
-      "Package value, deposits, and paid vs due balances",
-      "Project status from booked through delivered",
-      "Paid / Unpaid payment tracking separate from workflow",
-      "Crew assignment and event date on each card",
-    ],
-  },
-  {
-    title: "Payroll",
-    description: "Know what you owe the team before month-end surprises.",
-    tone: "violet",
-    icon: "payroll",
-    bullets: [
-      "Monthly salary with advances and deductions",
-      "Pending vs paid at a glance",
-      "Manager access for day-to-day payroll updates",
-      "Rolls into dashboard cash-flow totals",
-    ],
-  },
-  {
-    title: "Gear inventory",
-    description: "Your kit list with availability that updates when gear goes out on rental.",
-    tone: "pink",
-    icon: "gear",
-    bullets: [
-      "Serial numbers, condition, and day rates",
-      "Available, rented, or maintenance status",
-      "Quick scan of what is free for the next shoot",
-      "Tied to rental bookings automatically",
-    ],
-  },
-  {
-    title: "Rentals",
-    description: "Multi-item rental bookings with deposits split fairly across gear lines.",
-    tone: "amber",
-    icon: "rentals",
-    bullets: [
-      "Add several gear lines in one booking",
-      "Deposit on first row, balance tracked per rental",
-      "Paid amounts split by each item's rent share",
-      "Return status updates inventory when gear is back",
-    ],
-  },
-  {
-    title: "Expenses",
-    description: "Operating costs logged against the same ledger as your income.",
-    tone: "teal",
-    icon: "expenses",
-    bullets: [
-      "Category, vendor, and date on every entry",
-      "Feeds month-wise net reports",
-      "Manager can log expenses alongside the owner",
-      "Keeps profit picture honest week to week",
-    ],
-  },
-  {
-    title: "Reports & charts",
-    description: "See trends instead of guessing from memory at tax time.",
-    tone: "blue",
-    icon: "reports",
-    bullets: [
-      "Colorful revenue chart — client vs rental pay",
-      "Clients onboarded per month",
-      "Six-month table: income, expenses, net",
-      "Owner-only reports for full financial view",
-    ],
-  },
-] as const;
-
-const WORKFLOWS = [
-  {
-    title: "Book a new couple",
-    description:
-      "Add the project with package amount and deposit. Track delivery status as you shoot and edit. Mark Paid when the final installment lands.",
-    image: LANDING_IMAGES.workflowBook,
-    imageAlt: "Wedding couple portrait",
-  },
-  {
-    title: "Pay the crew",
-    description:
-      "Enter monthly salary, advances, and deductions for editors and assistants. Mark paid when you transfer — payroll due shows on the dashboard.",
-    image: LANDING_IMAGES.workflowPayroll,
-    imageAlt: "Film crew collaborating",
-  },
-  {
-    title: "Rent gear out",
-    description:
-      "Build a multi-item rental, take a deposit, and watch inventory flip to Rented. On return, gear becomes Available again.",
-    image: LANDING_IMAGES.workflowRent,
-    imageAlt: "Professional cinema camera",
-  },
-] as const;
-
-const STEPS = [
-  {
-    step: "01",
-    title: "Owner registers",
-    description:
-      "Create your studio workspace with name, city, phone, and tagline. Your profile appears across the dashboard and sidebar.",
-  },
-  {
-    step: "02",
-    title: "Manager joins",
-    description:
-      "A second email joins the same workspace using the owner email. Both see the same clients, payroll, and rentals.",
-  },
-  {
-    step: "03",
-    title: "Run the studio",
-    description:
-      "Log work daily from any browser. Your studio data is stored securely in the cloud with owner and manager access.",
-  },
-] as const;
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 const FAQ = [
   {
@@ -199,23 +49,8 @@ const FAQ = [
   },
 ] as const;
 
-const PREVIEW_BARS = [
-  { height: "42%", className: "" },
-  { height: "68%", className: "" },
-  { height: "55%", className: "landing-preview__bar-col--violet" },
-  { height: "80%", className: "landing-preview__bar-col--pink" },
-  { height: "48%", className: "landing-preview__bar-col--amber" },
-  { height: "62%", className: "landing-preview__bar-col--teal" },
-] as const;
-
 export function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const [activeModule, setActiveModule] = useState<string | null>(null);
-
-  const handleModuleSelect = useCallback((id: string) => {
-    setActiveModule(id);
-    document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -224,7 +59,10 @@ export function LandingPage() {
   }, []);
 
   return (
-    <div className="landing" ref={rootRef}>
+    <div
+      ref={rootRef}
+      className={`landing landing--mercury ${inter.variable} ${manrope.variable}`}
+    >
       <header className="landing-nav landing-nav--animate">
         <Link href="/" className="landing-brand">
           <span className="landing-brand__mark" aria-hidden>
@@ -237,324 +75,196 @@ export function LandingPage() {
         </Link>
         <nav className="landing-nav__links" aria-label="Primary">
           <ThemeToggle className="landing-nav__theme" />
-          <a href="#features">Features</a>
+          <a href="#products">Products</a>
           <a href="#workflows">Workflows</a>
           <a href="#how-it-works">How it works</a>
           <a href="#faq">FAQ</a>
           <Link href="/login">Log in</Link>
           <Link href="/login?mode=register" className="btn btn--primary landing-nav__cta">
-            Get started
+            Open account
           </Link>
         </nav>
       </header>
 
-      <section className="landing-hero landing-hero--enhanced">
-        <div className="landing-hero__bg" aria-hidden>
-          <span className="landing-glow landing-glow--1" data-parallax="0.06" />
-          <span className="landing-glow landing-glow--2" data-parallax="0.1" />
-          <span className="landing-glow landing-glow--3" data-parallax="0.04" />
-        </div>
-        <div className="landing-hero__copy">
-          <p className="landing-eyebrow landing-hero__anim">Wedding film studio operations</p>
-          <h1 className="landing-hero__anim">
-            Run your studio
-            <br />
-            <span className="landing-gradient-text">with clarity.</span>
-          </h1>
-          <p className="landing-lead landing-hero__anim">
-            A refined operations ledger for wedding film teams — clients, crew payroll, gear inventory,
-            rentals, and cash flow in one calm workspace. Owners and managers collaborate securely from
-            separate accounts.
-          </p>
-          <div className="landing-hero__actions landing-hero__anim">
-            <Link href="/login?mode=register" className="btn btn--primary landing-hero__btn">
-              Get started free
-            </Link>
-            <Link href="/login" className="btn btn--secondary landing-hero__btn">
-              Log in
-            </Link>
+      <section className="m-hero">
+        <div className="m-hero__bg" aria-hidden>
+          <div data-parallax style={{ position: "absolute", inset: 0 }}>
+            <Image
+              src={MERCURY_HERO_IMAGE}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              style={{ objectFit: "cover" }}
+            />
           </div>
-          <ul className="landing-hero__points landing-hero__anim">
-            <li>Cloud workspace — owner and manager stay in sync</li>
-            <li>NPR amounts with paisa precision</li>
-            <li>Colorful revenue &amp; onboarding charts</li>
-            <li>Owner + manager with role-based access</li>
-          </ul>
-          <div className="landing-hero__photos landing-hero__anim">
-            <div className="landing-hero__photo landing-hero__photo--main">
+          <div className="m-hero__overlay" />
+          <div className="m-hero__grain" />
+        </div>
+        <div className="m-hero__layout">
+          <div className="m-hero__inner">
+            <p className="m-hero__eyebrow m-hero__anim">Wedding film studio operations</p>
+            <h1 className="m-hero__anim">
+              Radically clearer
+              <br />
+              studio finance
+            </h1>
+            <p className="m-hero__lead m-hero__anim">
+              Apply in minutes to experience operations unlike scattered spreadsheets — clients,
+              payroll, gear, rentals, and reports in one calm workspace.
+            </p>
+            <div className="m-hero__cta-group m-hero__anim">
+              <input
+                type="email"
+                className="m-hero__input"
+                placeholder="Your work email"
+                aria-label="Work email"
+                autoComplete="email"
+              />
+              <Link href="/login?mode=register" className="m-hero__cta-btn">
+                Open account
+              </Link>
+            </div>
+            <p className="m-hero__fine m-hero__anim">
+              Cloud workspace for owners and managers. NPR amounts with paisa precision.
+            </p>
+            <div className="m-hero__secondary-actions m-hero__anim">
+              <Link href="/login" className="m-hero__ghost">
+                Log in
+              </Link>
+              <a href="#products" className="m-hero__ghost">
+                Explore modules
+              </a>
+            </div>
+          </div>
+          <LandingHeroDevice />
+        </div>
+      </section>
+
+      <section id="products" className="m-section m-section--wide">
+        <div className="m-section__head m-reveal">
+          <h2>Everything you run in a studio. All in one place.</h2>
+          <p>
+            Clients, payroll, gear, rentals, and reports — connected to the same ledger so balances
+            stay aligned without reconciling separate tools.
+          </p>
+        </div>
+        <LandingProductTabs />
+      </section>
+
+      <section className="m-section">
+        <div className="m-section__head m-reveal">
+          <h2>Loved by wedding film teams who need clarity</h2>
+          <p>Owners and managers on one workspace — permissions where you need them.</p>
+        </div>
+        <LandingTestimonials />
+      </section>
+
+      <LandingCardStack />
+
+      <section id="workflows" className="m-section m-section--wide">
+        <div className="m-section__head m-reveal">
+          <h2>Typical workflows, already wired in</h2>
+          <p>How studios use WedStudio OS week to week — hover to zoom, scroll to explore.</p>
+        </div>
+        <div className="m-workflows m-reveal">
+          <article className="m-workflow-card">
+            <div className="m-workflow-card__media">
               <Image
-                src={LANDING_IMAGES.heroPrimary}
-                alt="Cinematographer filming a wedding"
+                src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=700&q=80"
+                alt="Wedding couple"
                 fill
-                sizes="(max-width: 900px) 55vw, 320px"
-                priority
+                sizes="(max-width: 900px) 100vw, 360px"
               />
             </div>
-            <div className="landing-hero__photo--stack">
-              <div className="landing-hero__photo landing-hero__photo--sm">
-                <Image
-                  src={LANDING_IMAGES.heroSecondary}
-                  alt="Outdoor wedding scene"
-                  fill
-                  sizes="(max-width: 900px) 40vw, 200px"
-                />
-              </div>
-              <div className="landing-hero__photo landing-hero__photo--sm">
-                <Image
-                  src={LANDING_IMAGES.heroTertiary}
-                  alt="Camera gear in a studio"
-                  fill
-                  sizes="(max-width: 900px) 40vw, 200px"
-                />
-              </div>
+            <div className="m-workflow-card__body">
+              <h3>Book a new couple</h3>
+              <p>Package value, deposits, crew, and delivery status on one project card.</p>
             </div>
-          </div>
-        </div>
-
-        <div className="landing-hero__visual">
-          <div className="landing-hero__orbit-wrap">
-            <LandingHeroVisual onModuleSelect={handleModuleSelect} />
-          </div>
-          <div className="landing-hero__preview landing-hero__anim" aria-hidden>
-          <div className="landing-preview landing-preview--float">
-            <div className="landing-preview__bar">
-              <span className="landing-preview__dot" />
-              <span className="landing-preview__dot" />
-              <span className="landing-preview__dot" />
-            </div>
-            <div className="landing-preview__body">
-              <div className="landing-preview__sidebar">
-                <div className="landing-preview__brand" />
-                <div className="landing-preview__nav-item landing-preview__nav-item--active" />
-                <div className="landing-preview__nav-item" />
-                <div className="landing-preview__nav-item" />
-                <div className="landing-preview__nav-item" />
-              </div>
-              <div className="landing-preview__main">
-                <div className="landing-preview__metrics">
-                  <div className="landing-preview__metric landing-preview__metric--pulse" />
-                  <div className="landing-preview__metric" />
-                  <div className="landing-preview__metric landing-preview__metric--accent" />
-                </div>
-                <div className="landing-preview__chart">
-                  {PREVIEW_BARS.map((bar, index) => (
-                    <div
-                      key={index}
-                      className={`landing-preview__bar-col landing-preview__bar-col--animate ${bar.className}`.trim()}
-                      style={{ "--bar-height": bar.height } as CSSProperties}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-          </div>
-        </div>
-      </section>
-
-      <LandingMarquee />
-
-      <section className="landing-platform landing-reveal" aria-label="Studio platform">
-        <div className="landing-platform__inner">
-          <p className="landing-eyebrow">One workspace</p>
-          <h2>
-            Every module connects to the same{" "}
-            <span className="landing-gradient-text">studio ledger</span>
-          </h2>
-          <p>
-            Clients, payroll, gear, rentals, and expenses feed one dashboard — so balances and reports
-            stay aligned without reconciling separate spreadsheets.
-          </p>
-        </div>
-        <div className="landing-platform__cards" aria-hidden>
-          <div className="landing-platform__card landing-platform__card--owner">
-            <span className="landing-platform__card-label">Owner</span>
-            <span className="landing-platform__card-detail">Full reports &amp; workspace</span>
-          </div>
-          <div className="landing-platform__bridge">
-            <span className="landing-platform__bridge-line" />
-            <span className="landing-platform__bridge-hub">WS</span>
-            <span className="landing-platform__bridge-line" />
-          </div>
-          <div className="landing-platform__card landing-platform__card--manager">
-            <span className="landing-platform__card-label">Manager</span>
-            <span className="landing-platform__card-detail">Day-to-day ops &amp; payroll</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="landing-stats landing-reveal" aria-label="Product highlights">
-        {STATS.map((stat, index) => (
-          <article
-            key={stat.label}
-            className="landing-stat"
-            style={{ transitionDelay: `${index * 0.06}s` }}
-          >
-            <p className="landing-stat__value">{stat.value}</p>
-            <h3 className="landing-stat__label">{stat.label}</h3>
-            <p className="landing-stat__detail">{stat.detail}</p>
           </article>
-        ))}
+          <article className="m-workflow-card">
+            <div className="m-workflow-card__media">
+              <Image
+                src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=80"
+                alt="Film crew"
+                fill
+                sizes="(max-width: 900px) 100vw, 360px"
+              />
+            </div>
+            <div className="m-workflow-card__body">
+              <h3>Pay the crew</h3>
+              <p>Monthly salary, advances, and pending vs paid totals on the dashboard.</p>
+            </div>
+          </article>
+          <article className="m-workflow-card">
+            <div className="m-workflow-card__media">
+              <Image
+                src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=700&q=80"
+                alt="Cinema camera"
+                fill
+                sizes="(max-width: 900px) 100vw, 360px"
+              />
+            </div>
+            <div className="m-workflow-card__body">
+              <h3>Rent gear out</h3>
+              <p>Multi-item rentals with deposits and inventory that updates on return.</p>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section id="features" className="landing-section landing-reveal">
-        <div className="landing-section__head">
-          <p className="landing-eyebrow">Everything in one OS</p>
-          <h2>Run the business side of your studio</h2>
-          <p>
-            From the first inquiry to final delivery — plus payroll, gear, and month-end reports. Each module
-            connects to the same ledger so you are never reconciling three different tools.
-          </p>
+      <section id="how-it-works" className="m-section">
+        <div className="m-section__head m-reveal">
+          <h2>Get started fast. And never stop moving.</h2>
+          <p>Register as owner, invite your manager, and run the studio from any browser.</p>
         </div>
-        <p className="landing-features__hint landing-reveal">
-          Hover a module below or click a pill in the hero orbit to highlight it.
-        </p>
-        <div className="landing-features landing-reveal">
-          {FEATURES.map((feature) => (
-            <article
-              key={feature.title}
-              className={`landing-feature landing-feature--${feature.tone}${activeModule === feature.icon ? " is-highlighted" : ""}`}
-              data-module={feature.icon}
-              onMouseEnter={() => setActiveModule(feature.icon)}
-              onMouseLeave={() => setActiveModule(null)}
-            >
-              <div className="landing-feature__glow" aria-hidden />
-              <div className="landing-feature__head">
-                <span className="landing-feature__icon">
-                  <FeatureIcon name={feature.icon} />
-                </span>
-                <span className="landing-feature__tag">Module</span>
-              </div>
-              <h3>{feature.title}</h3>
-              <p className="landing-feature__desc">{feature.description}</p>
-              <ul className="landing-feature__list">
-                {feature.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
+        <div className="m-steps m-reveal">
+          {MERCURY_STEPS.map((step) => (
+            <article key={step.title} className="m-step">
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section id="workflows" className="landing-section landing-section--muted landing-reveal">
-        <div className="landing-section__head">
-          <p className="landing-eyebrow">Day in the studio</p>
-          <h2>Typical workflows, already wired in</h2>
-          <p>How wedding film teams use WedStudio OS week to week — without jumping between spreadsheets.</p>
+      <section className="m-section m-section--wide">
+        <div className="m-section__head m-reveal">
+          <h2>You&apos;re building something lasting. So is your ledger.</h2>
         </div>
-        <div className="landing-workflows landing-reveal">
-          {WORKFLOWS.map((item) => (
-            <article key={item.title} className="landing-workflow">
-              <div className="landing-workflow__media">
-                <Image src={item.image} alt={item.imageAlt} fill sizes="(max-width: 900px) 100vw, 360px" />
-              </div>
-              <div className="landing-workflow__body">
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
+        <div className="m-stats m-reveal landing-stats">
+          {MERCURY_STATS.map((stat) => (
+            <article key={stat.label} className="m-stat landing-stat">
+              <p className="m-stat__value" data-count-target={stat.value}>
+                0
+              </p>
+              <p className="m-stat__label">{stat.label}</p>
             </article>
           ))}
         </div>
       </section>
 
-      <section className="landing-built landing-reveal">
-        <div className="landing-built__copy">
-          <p className="landing-eyebrow">Made for your niche</p>
-          <h2>Wedding film is a project business</h2>
-          <p>
-            You juggle couples, dates, second shooters, cinema cameras, and rental income — often in the same
-            week. WedStudio OS mirrors how studios actually work: projects first, people and gear attached to
-            those projects, money flowing in and out with clear balances.
-          </p>
-          <ul className="landing-built__list">
-            <li>Studio profile with your name on the sidebar after setup</li>
-            <li>Dashboard metrics: active projects, rentals out, payroll due, net cash</li>
-            <li>Project cards with payment status, crew, and delivery pipeline</li>
-            <li>Month-wise reports for owner review and tax prep</li>
-          </ul>
+      <section className="m-section">
+        <div className="m-section__head m-reveal">
+          <h2>Standard spreadsheets stop short. WedStudio goes further.</h2>
         </div>
-        <div className="landing-built__aside">
-          <div className="landing-built__media">
-            <Image
-              src={LANDING_IMAGES.built}
-              alt="Wedding videographer at work"
-              fill
-              sizes="(max-width: 900px) 100vw, 480px"
-            />
-            <span className="landing-built__media-badge">Built for wedding film teams</span>
-          </div>
-          <div className="landing-built__panel" aria-hidden>
-            <div className="landing-built__row">
-              <span>Active projects</span>
-              <strong
-                className="landing-built__chip landing-built__chip--indigo"
-                data-count-target="12"
-              >
-                0
-              </strong>
-            </div>
-            <div className="landing-built__row">
-              <span>Gear on rent</span>
-              <strong
-                className="landing-built__chip landing-built__chip--amber"
-                data-count-target="5"
-              >
-                0
-              </strong>
-            </div>
-            <div className="landing-built__row">
-              <span>Payroll pending</span>
-              <strong
-                className="landing-built__chip landing-built__chip--violet"
-                data-count-target="NPR 84k"
-              >
-                NPR 0
-              </strong>
-            </div>
-            <div className="landing-built__row">
-              <span>Net cash (month)</span>
-              <strong
-                className="landing-built__chip landing-built__chip--teal"
-                data-count-target="+ NPR 2.4L"
-              >
-                + NPR 0
-              </strong>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="how-it-works" className="landing-section landing-reveal">
-        <div className="landing-section__head">
-          <p className="landing-eyebrow">Team access</p>
-          <h2>Owner and manager, one workspace</h2>
-          <p>
-            Register once as owner, complete your studio profile, then invite a manager with a second email.
-            Same clients, payroll, and rentals — different permissions for sensitive reports.
-          </p>
-        </div>
-        <ol className="landing-steps landing-reveal">
-          {STEPS.map((item) => (
-            <li key={item.step} className="landing-step">
-              <span className="landing-step__num">{item.step}</span>
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-            </li>
+        <div className="m-trust m-reveal">
+          {MERCURY_TRUST.map((item) => (
+            <article key={item.title} className="m-trust__item">
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </article>
           ))}
-        </ol>
+        </div>
       </section>
 
-      <section id="faq" className="landing-section landing-section--muted landing-section--center landing-reveal">
-        <div className="landing-section__head">
-          <p className="landing-eyebrow">Questions</p>
+      <section id="faq" className="m-section">
+        <div className="m-section__head m-reveal">
           <h2>Before you sign up</h2>
         </div>
-        <div className="landing-faq landing-reveal">
+        <div className="m-faq m-reveal">
           {FAQ.map((item) => (
-            <details key={item.q} className="landing-faq__item">
+            <details key={item.q} className="m-faq__item">
               <summary>{item.q}</summary>
               <p>{item.a}</p>
             </details>
@@ -562,22 +272,19 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="landing-cta landing-reveal">
-        <div className="landing-cta__glow" aria-hidden />
-        <div className="landing-cta__inner">
-          <h2>Ready to organize your studio?</h2>
-          <p>
-            Set up your workspace in minutes. Cloud-backed ledger with CSV export and team roles —
-            your pace.
-          </p>
-          <div className="landing-cta__actions">
-            <Link href="/login?mode=register" className="btn btn--primary">
-              Create studio workspace
-            </Link>
-            <Link href="/login" className="btn btn--secondary">
-              I already have an account
-            </Link>
-          </div>
+      <section className="m-cta-final m-reveal">
+        <div className="m-cta-final__glow" aria-hidden />
+        <h2>Studio operations — redesigned from the ground up.</h2>
+        <p>
+          Set up your workspace in minutes. Cloud-backed ledger with CSV export and team roles.
+        </p>
+        <div className="m-cta-final__actions">
+          <Link href="/login?mode=register" className="btn btn--primary">
+            Open account
+          </Link>
+          <Link href="/login" className="btn btn--secondary">
+            Log in
+          </Link>
         </div>
       </section>
 
