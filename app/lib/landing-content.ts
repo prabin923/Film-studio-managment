@@ -9,11 +9,11 @@ export const LANDING_IMAGES = {
   built:
     "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80",
   workflowBook:
-    "https://images.unsplash.com/photo-1522673607200-164d1b6fc486?auto=format&fit=crop&w=700&q=80",
+    "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=700&q=80",
   workflowPayroll:
     "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=80",
   workflowRent:
-    "https://images.unsplash.com/photo-1598488035139-bdaa754c5c0e?auto=format&fit=crop&w=700&q=80",
+    "https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=700&q=80",
 } as const;
 
 export type OrbitModuleId =
