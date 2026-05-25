@@ -1,8 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { initLandingAnimations } from "../lib/anime-motion";
+import { LANDING_IMAGES } from "../lib/landing-content";
+import { LandingHeroVisual } from "./landing-hero-visual";
+import { LandingMarquee } from "./landing-marquee";
 import { ThemeToggle } from "./theme-toggle";
 
 const STATS = [
@@ -136,16 +140,22 @@ const WORKFLOWS = [
     title: "Book a new couple",
     description:
       "Add the project with package amount and deposit. Track delivery status as you shoot and edit. Mark Paid when the final installment lands.",
+    image: LANDING_IMAGES.workflowBook,
+    imageAlt: "Wedding couple portrait",
   },
   {
     title: "Pay the crew",
     description:
       "Enter monthly salary, advances, and deductions for editors and assistants. Mark paid when you transfer — payroll due shows on the dashboard.",
+    image: LANDING_IMAGES.workflowPayroll,
+    imageAlt: "Film crew collaborating",
   },
   {
     title: "Rent gear out",
     description:
       "Build a multi-item rental, take a deposit, and watch inventory flip to Rented. On return, gear becomes Available again.",
+    image: LANDING_IMAGES.workflowRent,
+    imageAlt: "Professional cinema camera",
   },
 ] as const;
 
@@ -200,6 +210,12 @@ const PREVIEW_BARS = [
 
 export function LandingPage() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const [activeModule, setActiveModule] = useState<string | null>(null);
+
+  const handleModuleSelect = useCallback((id: string) => {
+    setActiveModule(id);
+    document.getElementById("features")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -232,13 +248,18 @@ export function LandingPage() {
         </nav>
       </header>
 
-      <section className="landing-hero">
+      <section className="landing-hero landing-hero--enhanced">
+        <div className="landing-hero__bg" aria-hidden>
+          <span className="landing-glow landing-glow--1" data-parallax="0.06" />
+          <span className="landing-glow landing-glow--2" data-parallax="0.1" />
+          <span className="landing-glow landing-glow--3" data-parallax="0.04" />
+        </div>
         <div className="landing-hero__copy">
           <p className="landing-eyebrow landing-hero__anim">Wedding film studio operations</p>
           <h1 className="landing-hero__anim">
             Run your studio
             <br />
-            with clarity.
+            <span className="landing-gradient-text">with clarity.</span>
           </h1>
           <p className="landing-lead landing-hero__anim">
             A refined operations ledger for wedding film teams — clients, crew payroll, gear inventory,
@@ -259,9 +280,42 @@ export function LandingPage() {
             <li>Colorful revenue &amp; onboarding charts</li>
             <li>Owner + manager with role-based access</li>
           </ul>
+          <div className="landing-hero__photos landing-hero__anim">
+            <div className="landing-hero__photo landing-hero__photo--main">
+              <Image
+                src={LANDING_IMAGES.heroPrimary}
+                alt="Cinematographer filming a wedding"
+                fill
+                sizes="(max-width: 900px) 55vw, 320px"
+                priority
+              />
+            </div>
+            <div className="landing-hero__photo--stack">
+              <div className="landing-hero__photo landing-hero__photo--sm">
+                <Image
+                  src={LANDING_IMAGES.heroSecondary}
+                  alt="Outdoor wedding scene"
+                  fill
+                  sizes="(max-width: 900px) 40vw, 200px"
+                />
+              </div>
+              <div className="landing-hero__photo landing-hero__photo--sm">
+                <Image
+                  src={LANDING_IMAGES.heroTertiary}
+                  alt="Camera gear in a studio"
+                  fill
+                  sizes="(max-width: 900px) 40vw, 200px"
+                />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="landing-hero__preview landing-hero__anim" aria-hidden>
+        <div className="landing-hero__visual">
+          <div className="landing-hero__orbit-wrap">
+            <LandingHeroVisual onModuleSelect={handleModuleSelect} />
+          </div>
+          <div className="landing-hero__preview landing-hero__anim" aria-hidden>
           <div className="landing-preview landing-preview--float">
             <div className="landing-preview__bar">
               <span className="landing-preview__dot" />
@@ -294,6 +348,38 @@ export function LandingPage() {
               </div>
             </div>
           </div>
+          </div>
+        </div>
+      </section>
+
+      <LandingMarquee />
+
+      <section className="landing-platform landing-reveal" aria-label="Studio platform">
+        <div className="landing-platform__inner">
+          <p className="landing-eyebrow">One workspace</p>
+          <h2>
+            Every module connects to the same{" "}
+            <span className="landing-gradient-text">studio ledger</span>
+          </h2>
+          <p>
+            Clients, payroll, gear, rentals, and expenses feed one dashboard — so balances and reports
+            stay aligned without reconciling separate spreadsheets.
+          </p>
+        </div>
+        <div className="landing-platform__cards" aria-hidden>
+          <div className="landing-platform__card landing-platform__card--owner">
+            <span className="landing-platform__card-label">Owner</span>
+            <span className="landing-platform__card-detail">Full reports &amp; workspace</span>
+          </div>
+          <div className="landing-platform__bridge">
+            <span className="landing-platform__bridge-line" />
+            <span className="landing-platform__bridge-hub">WS</span>
+            <span className="landing-platform__bridge-line" />
+          </div>
+          <div className="landing-platform__card landing-platform__card--manager">
+            <span className="landing-platform__card-label">Manager</span>
+            <span className="landing-platform__card-detail">Day-to-day ops &amp; payroll</span>
+          </div>
         </div>
       </section>
 
@@ -320,12 +406,17 @@ export function LandingPage() {
             connects to the same ledger so you are never reconciling three different tools.
           </p>
         </div>
-        <div className="landing-features">
-          {FEATURES.map((feature, index) => (
+        <p className="landing-features__hint landing-reveal">
+          Hover a module below or click a pill in the hero orbit to highlight it.
+        </p>
+        <div className="landing-features landing-reveal">
+          {FEATURES.map((feature) => (
             <article
               key={feature.title}
-              className={`landing-feature landing-feature--${feature.tone} landing-reveal`}
-              style={{ transitionDelay: `${(index % 3) * 0.08}s` }}
+              className={`landing-feature landing-feature--${feature.tone}${activeModule === feature.icon ? " is-highlighted" : ""}`}
+              data-module={feature.icon}
+              onMouseEnter={() => setActiveModule(feature.icon)}
+              onMouseLeave={() => setActiveModule(null)}
             >
               <div className="landing-feature__glow" aria-hidden />
               <div className="landing-feature__head">
@@ -352,15 +443,16 @@ export function LandingPage() {
           <h2>Typical workflows, already wired in</h2>
           <p>How wedding film teams use WedStudio OS week to week — without jumping between spreadsheets.</p>
         </div>
-        <div className="landing-workflows">
-          {WORKFLOWS.map((item, index) => (
-            <article
-              key={item.title}
-              className="landing-workflow landing-reveal"
-              style={{ transitionDelay: `${index * 0.1}s` }}
-            >
-              <h3>{item.title}</h3>
-              <p>{item.description}</p>
+        <div className="landing-workflows landing-reveal">
+          {WORKFLOWS.map((item) => (
+            <article key={item.title} className="landing-workflow">
+              <div className="landing-workflow__media">
+                <Image src={item.image} alt={item.imageAlt} fill sizes="(max-width: 900px) 100vw, 360px" />
+              </div>
+              <div className="landing-workflow__body">
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </div>
             </article>
           ))}
         </div>
@@ -382,22 +474,53 @@ export function LandingPage() {
             <li>Month-wise reports for owner review and tax prep</li>
           </ul>
         </div>
-        <div className="landing-built__panel" aria-hidden>
-          <div className="landing-built__row">
-            <span>Active projects</span>
-            <strong className="landing-built__chip landing-built__chip--indigo">12</strong>
+        <div className="landing-built__aside">
+          <div className="landing-built__media">
+            <Image
+              src={LANDING_IMAGES.built}
+              alt="Wedding videographer at work"
+              fill
+              sizes="(max-width: 900px) 100vw, 480px"
+            />
+            <span className="landing-built__media-badge">Built for wedding film teams</span>
           </div>
-          <div className="landing-built__row">
-            <span>Gear on rent</span>
-            <strong className="landing-built__chip landing-built__chip--amber">5</strong>
-          </div>
-          <div className="landing-built__row">
-            <span>Payroll pending</span>
-            <strong className="landing-built__chip landing-built__chip--violet">NPR 84k</strong>
-          </div>
-          <div className="landing-built__row">
-            <span>Net cash (month)</span>
-            <strong className="landing-built__chip landing-built__chip--teal">+ NPR 2.4L</strong>
+          <div className="landing-built__panel" aria-hidden>
+            <div className="landing-built__row">
+              <span>Active projects</span>
+              <strong
+                className="landing-built__chip landing-built__chip--indigo"
+                data-count-target="12"
+              >
+                0
+              </strong>
+            </div>
+            <div className="landing-built__row">
+              <span>Gear on rent</span>
+              <strong
+                className="landing-built__chip landing-built__chip--amber"
+                data-count-target="5"
+              >
+                0
+              </strong>
+            </div>
+            <div className="landing-built__row">
+              <span>Payroll pending</span>
+              <strong
+                className="landing-built__chip landing-built__chip--violet"
+                data-count-target="NPR 84k"
+              >
+                NPR 0
+              </strong>
+            </div>
+            <div className="landing-built__row">
+              <span>Net cash (month)</span>
+              <strong
+                className="landing-built__chip landing-built__chip--teal"
+                data-count-target="+ NPR 2.4L"
+              >
+                + NPR 0
+              </strong>
+            </div>
           </div>
         </div>
       </section>
@@ -411,13 +534,9 @@ export function LandingPage() {
             Same clients, payroll, and rentals — different permissions for sensitive reports.
           </p>
         </div>
-        <ol className="landing-steps">
-          {STEPS.map((item, index) => (
-            <li
-              key={item.step}
-              className="landing-step landing-reveal"
-              style={{ transitionDelay: `${index * 0.1}s` }}
-            >
+        <ol className="landing-steps landing-reveal">
+          {STEPS.map((item) => (
+            <li key={item.step} className="landing-step">
               <span className="landing-step__num">{item.step}</span>
               <div>
                 <h3>{item.title}</h3>
@@ -433,13 +552,9 @@ export function LandingPage() {
           <p className="landing-eyebrow">Questions</p>
           <h2>Before you sign up</h2>
         </div>
-        <div className="landing-faq">
-          {FAQ.map((item, index) => (
-            <details
-              key={item.q}
-              className="landing-faq__item landing-reveal"
-              style={{ transitionDelay: `${index * 0.06}s` }}
-            >
+        <div className="landing-faq landing-reveal">
+          {FAQ.map((item) => (
+            <details key={item.q} className="landing-faq__item">
               <summary>{item.q}</summary>
               <p>{item.a}</p>
             </details>
@@ -448,6 +563,7 @@ export function LandingPage() {
       </section>
 
       <section className="landing-cta landing-reveal">
+        <div className="landing-cta__glow" aria-hidden />
         <div className="landing-cta__inner">
           <h2>Ready to organize your studio?</h2>
           <p>
