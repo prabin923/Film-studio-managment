@@ -111,3 +111,14 @@ export async function apiGetWorkspaceTeam() {
     await apiFetch("/api/workspace/manager", fetchOpts),
   );
 }
+
+export async function apiCreateManager(payload: { name: string; email: string; password: string }) {
+  return parseJson<{ manager: Account }>(
+    await apiFetch("/api/workspace/manager", {
+      ...fetchOpts,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
+}

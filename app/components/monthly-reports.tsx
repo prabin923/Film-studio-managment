@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { buildMonthlyReports, sumMonthlyReportTotals, type MonthlyReportRow } from "../lib/chart-data";
 import { money } from "../lib/format";
 import type { Store } from "../lib/types";
+import { downloadMonthlyReportCsv } from "../lib/export-csv";
 import { EmptyState, Panel, PanelHead } from "./ui";
 
 function MonthlyReportTableRow({
@@ -47,6 +48,15 @@ export function MonthlyReports({ store, monthCount = 6 }: { store: Store; monthC
       <PanelHead
         title="Month-wise reports"
         description={`Income, expenses, and client onboarding for the last ${monthCount} months.`}
+        action={
+          <button
+            className="btn btn--secondary"
+            type="button"
+            onClick={() => downloadMonthlyReportCsv(store, monthCount)}
+          >
+            Export CSV
+          </button>
+        }
       />
       {!hasActivity ? (
         <EmptyState>No monthly activity recorded in this period yet.</EmptyState>

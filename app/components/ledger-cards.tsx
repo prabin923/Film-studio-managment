@@ -1,4 +1,4 @@
-import { Badge } from "./ui";
+import { Badge, PhoneLink } from "./ui";
 import { money, statusTone } from "../lib/format";
 import type { Expense, InventoryItem, Rental, Staff } from "../lib/types";
 
@@ -24,10 +24,12 @@ function RecordMetrics({
 export function StaffCard({
   person,
   onMarkPaid,
+  onEdit,
   onRemove,
 }: {
   person: Staff;
   onMarkPaid: () => void;
+  onEdit?: () => void;
   onRemove: () => void;
 }) {
   const netDue = person.monthlySalary - person.advance - person.deduction;
@@ -56,6 +58,11 @@ export function StaffCard({
               Mark paid
             </button>
           ) : null}
+          {onEdit ? (
+            <button className="text-btn" type="button" onClick={onEdit}>
+              Edit
+            </button>
+          ) : null}
           <button className="text-btn text-btn--danger" type="button" onClick={onRemove}>
             Remove
           </button>
@@ -67,9 +74,11 @@ export function StaffCard({
 
 export function ExpenseCard({
   expense,
+  onEdit,
   onRemove,
 }: {
   expense: Expense;
+  onEdit?: () => void;
   onRemove: () => void;
 }) {
   return (
@@ -85,6 +94,11 @@ export function ExpenseCard({
       </header>
       {expense.notes ? <p className="record-card__note">{expense.notes}</p> : null}
       <footer className="record-card__foot record-card__foot--split">
+        {onEdit ? (
+          <button className="text-btn" type="button" onClick={onEdit}>
+            Edit
+          </button>
+        ) : null}
         <button className="text-btn text-btn--danger" type="button" onClick={onRemove}>
           Remove
         </button>
@@ -97,11 +111,13 @@ export function InventoryCard({
   item,
   onSetAvailable,
   onSetMaintenance,
+  onEdit,
   onRemove,
 }: {
   item: InventoryItem;
   onSetAvailable: () => void;
   onSetMaintenance: () => void;
+  onEdit?: () => void;
   onRemove: () => void;
 }) {
   return (
@@ -135,6 +151,11 @@ export function InventoryCard({
               Maintenance
             </button>
           ) : null}
+          {onEdit ? (
+            <button className="text-btn" type="button" onClick={onEdit}>
+              Edit
+            </button>
+          ) : null}
           <button className="text-btn text-btn--danger" type="button" onClick={onRemove}>
             Remove
           </button>
@@ -165,7 +186,7 @@ export function RentalCard({
         <div>
           <h3 className="record-card__title">{rental.renter}</h3>
           <p className="record-card__subtitle">
-            {rental.phone} · {itemName}
+            <PhoneLink phone={rental.phone} /> · {itemName}
           </p>
         </div>
         <Badge tone={statusTone(rental.status)}>{rental.status}</Badge>

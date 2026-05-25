@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { createManagerByOwner } from "@/lib/server/auth";
+import { databaseErrorMessage } from "@/lib/server/db-error";
+import { accountFromWorkspaceRow } from "@/lib/server/store";
+import { getSession } from "@/lib/server/session";
 
 export const dynamic = "force-dynamic";
-import { prisma } from "@/lib/prisma";
-import { getSession } from "@/lib/server/session";
-import { accountFromWorkspaceRow } from "@/lib/server/store";
 
 export async function GET() {
   try {
@@ -41,6 +43,35 @@ export async function GET() {
     });
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to load manager." }, { status: 500 });
+    return NextResponse.json({ error: databaseErrorMessage(error) }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = await getSession();
+    if (!session) {
+      return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+    }
+
+    if (session.role !== "owner") {
+      return NextResponse.json({ error: "Only the studio owner can add a manager." }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const result = await createManagerByOwner(session.workspaceId, {
+      name: String(body.name || ""),
+      email: String(body.email || ""),
+      password: String(body.password || ""),
+    });
+
+    if (!result.ok) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+
+    return NextResponse.json({ manager: result.manager });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: databaseErrorMessage(error) }, { status: 500 });
   }
 }

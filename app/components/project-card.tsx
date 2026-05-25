@@ -1,11 +1,13 @@
-import { Badge, PaymentSelect, StatusSelect } from "./ui";
+import { isEventSoon } from "../lib/dashboard-utils";
 import { money, statusTone } from "../lib/format";
 import type { Client, ProjectPaymentStatus, ProjectStatus } from "../lib/types";
+import { Badge, PaymentSelect, PhoneLink, StatusSelect } from "./ui";
 
 type ProjectCardProps = {
   client: Client;
   compact?: boolean;
   onRemove?: () => void;
+  onEdit?: () => void;
   onStatusChange?: (status: ProjectStatus) => void;
   onPaymentStatusChange?: (status: ProjectPaymentStatus) => void;
 };
@@ -14,18 +16,27 @@ export function ProjectCard({
   client,
   compact = false,
   onRemove,
+  onEdit,
   onStatusChange,
   onPaymentStatusChange,
 }: ProjectCardProps) {
   const balanceDue = client.packageAmount - client.paidAmount;
+  const eventSoon = isEventSoon(client.eventDate);
 
   return (
     <article className={compact ? "project-card project-card--compact" : "project-card"}>
       <header className="project-card__head">
         <div>
-          <h3>{client.name}</h3>
+          <h3>
+            {client.name}
+            {eventSoon ? (
+              <Badge tone="caution" className="project-card__soon">
+                Soon
+              </Badge>
+            ) : null}
+          </h3>
           <p>
-            {client.phone}
+            <PhoneLink phone={client.phone} />
             {` · ${client.projectType}`}
           </p>
         </div>
@@ -70,11 +81,18 @@ export function ProjectCard({
 
       {!compact && client.notes ? <p className="project-card__notes">{client.notes}</p> : null}
 
-      {onRemove ? (
+      {onEdit || onRemove ? (
         <footer className="project-card__foot">
-          <button className="text-btn text-btn--danger" type="button" onClick={onRemove} aria-label={`Remove ${client.name}`}>
-            Remove project
-          </button>
+          {onEdit ? (
+            <button className="text-btn" type="button" onClick={onEdit}>
+              Edit
+            </button>
+          ) : null}
+          {onRemove ? (
+            <button className="text-btn text-btn--danger" type="button" onClick={onRemove} aria-label={`Remove ${client.name}`}>
+              Remove
+            </button>
+          ) : null}
         </footer>
       ) : null}
     </article>

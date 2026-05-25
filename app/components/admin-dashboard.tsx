@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { buildRevenueByMonth } from "../lib/chart-data";
+import { isEventSoon, sortClientsByEventDate } from "../lib/dashboard-utils";
 import { money, statusTone } from "../lib/format";
 import type { ProjectPaymentStatus, ProjectStatus, Role, Stats, Store, View } from "../lib/types";
 import { AnalyticsCharts } from "./analytics-charts";
@@ -65,7 +66,10 @@ export function AdminDashboardHome({
   updateClientPaymentStatus: (clientId: string, status: ProjectPaymentStatus) => void;
 }) {
   const activeRentals = store.rentals.filter((rental) => rental.status !== "Returned");
-  const activeClients = store.clients.filter((c) => c.status !== "Delivered");
+  const activeClients = sortClientsByEventDate(store.clients.filter((c) => c.status !== "Delivered"));
+  const shootsSoon = store.clients.filter(
+    (c) => c.status !== "Delivered" && isEventSoon(c.eventDate),
+  ).length;
 
   return (
     <div className="admin-home">
@@ -73,6 +77,9 @@ export function AdminDashboardHome({
         <article className="admin-metric">
           <span className="admin-metric__label">Active projects</span>
           <strong className="admin-metric__value">{stats.activeProjects}</strong>
+          {shootsSoon > 0 ? (
+            <span className="admin-metric__hint">{shootsSoon} shoot{shootsSoon === 1 ? "" : "s"} in 14 days</span>
+          ) : null}
         </article>
         <article className="admin-metric">
           <span className="admin-metric__label">Client balance due</span>

@@ -160,6 +160,59 @@ export function StudioProfileSetup({
   );
 }
 
+export function ManagerInviteForm({
+  onSubmit,
+  pending,
+  error,
+}: {
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  pending?: boolean;
+  error?: string;
+}) {
+  return (
+    <form className="manager-invite" onSubmit={onSubmit}>
+      <h4 className="manager-invite__title">Add manager</h4>
+      <p className="manager-invite__desc">
+        Create a manager account for your studio. They can log in with the email and password you set below.
+      </p>
+      {error ? (
+        <p className="auth-form__error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className="manager-invite__fields">
+        <Field label="Full name">
+          <input name="name" placeholder="Manager name" required disabled={pending} />
+        </Field>
+        <Field label="Email">
+          <input
+            name="email"
+            type="email"
+            placeholder="manager@studio.com"
+            required
+            autoComplete="email"
+            disabled={pending}
+          />
+        </Field>
+        <Field label="Password">
+          <input
+            name="password"
+            type="password"
+            placeholder="Min. 8 characters"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            disabled={pending}
+          />
+        </Field>
+      </div>
+      <button className="btn btn--primary" type="submit" disabled={pending}>
+        {pending ? "Adding manager…" : "Add manager"}
+      </button>
+    </form>
+  );
+}
+
 export function ManagerJoinFields() {
   return (
     <div className="auth-form__fields">

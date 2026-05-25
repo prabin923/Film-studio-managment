@@ -9,7 +9,7 @@ const STATS = [
   { value: "6", label: "Core modules", detail: "Clients, payroll, gear, rentals, expenses, reports" },
   { value: "2", label: "Team roles", detail: "Owner and manager on one workspace" },
   { value: "NPR", label: "Local currency", detail: "Amounts stored in paisa for accuracy" },
-  { value: "0", label: "Cloud required", detail: "Runs in your browser on this device" },
+  { value: "1", label: "Shared workspace", detail: "Owner and manager on secure cloud data" },
 ] as const;
 
 function FeatureIcon({ name }: { name: string }) {
@@ -166,14 +166,14 @@ const STEPS = [
     step: "03",
     title: "Run the studio",
     description:
-      "Log work daily on this device. Data stays in your browser — no subscription, no server setup for your ledger.",
+      "Log work daily from any browser. Your studio data is stored securely in the cloud with owner and manager access.",
   },
 ] as const;
 
 const FAQ = [
   {
     q: "Is my data stored in the cloud?",
-    a: "No. WedStudio OS keeps your studio ledger in this browser's local storage on your device. Back up by exporting or using the same machine you work on.",
+    a: "Yes. Your workspace is saved to a secure Postgres database. Sign in from any device — owner and manager share the same studio ledger.",
   },
   {
     q: "Can the owner and manager use different emails?",
@@ -254,7 +254,7 @@ export function LandingPage() {
             </Link>
           </div>
           <ul className="landing-hero__points landing-hero__anim">
-            <li>No cloud setup — data stays in your browser</li>
+            <li>Cloud workspace — owner and manager stay in sync</li>
             <li>NPR amounts with paisa precision</li>
             <li>Colorful revenue &amp; onboarding charts</li>
             <li>Owner + manager with role-based access</li>
@@ -451,7 +451,7 @@ export function LandingPage() {
         <div className="landing-cta__inner">
           <h2>Ready to organize your studio?</h2>
           <p>
-            Set up your workspace in minutes on this device. No subscription — your ledger, your browser,
+            Set up your workspace in minutes. Cloud-backed ledger with CSV export and team roles —
             your pace.
           </p>
           <div className="landing-cta__actions">

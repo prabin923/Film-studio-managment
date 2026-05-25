@@ -8,8 +8,17 @@ import {
   type ProjectStatus,
 } from "../lib/types";
 
-export function Badge({ tone = "neutral", children }: { tone?: StatusTone; children: ReactNode }) {
-  return <span className={`badge badge--${tone}`}>{children}</span>;
+export function Badge({
+  tone = "neutral",
+  children,
+  className,
+}: {
+  tone?: StatusTone;
+  children: ReactNode;
+  className?: string;
+}) {
+  const classes = className ? `badge badge--${tone} ${className}` : `badge badge--${tone}`;
+  return <span className={classes}>{children}</span>;
 }
 
 export function StatusSelect({
@@ -168,6 +177,17 @@ export function PageHeader({
       </div>
       {action}
     </header>
+  );
+}
+
+export function PhoneLink({ phone, className }: { phone: string; className?: string }) {
+  const trimmed = phone.trim();
+  if (!trimmed) return null;
+  const href = `tel:${trimmed.replace(/\s/g, "")}`;
+  return (
+    <a className={className ? `phone-link ${className}` : "phone-link"} href={href}>
+      {trimmed}
+    </a>
   );
 }
 
