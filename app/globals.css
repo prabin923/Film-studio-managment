@@ -1646,20 +1646,6 @@ a.btn--secondary {
   color: var(--text-secondary);
 }
 
-.auth-hint--demo {
-  margin-top: 12px;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.auth-hint--demo code {
-  font-size: 0.78rem;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: var(--surface-muted);
-  border: 1px solid var(--border);
-}
-
 .auth-form__submit {
   width: 100%;
   margin-top: 4px;

@@ -173,10 +173,6 @@ export function AuthScreen({
                 {pending ? "Signing in…" : "Log in"}
               </button>
 
-              <p className="auth-hint auth-hint--demo">
-                Demo: <code>owner@infinitycreations.com</code> / <code>demo12345</code>
-              </p>
-
               <p className="auth-form__switch">
                 New studio?{" "}
                 <button type="button" className="auth-link" onClick={() => switchMode("register")}>
