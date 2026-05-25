@@ -20,6 +20,10 @@ export type PayStatus = "Pending" | "Paid";
 export type AuthMode = "login" | "register";
 export type RegisterAs = "owner" | "manager";
 
+import type { StudioBranding } from "./studio-branding";
+
+export type { BrandShape, StudioBranding } from "./studio-branding";
+
 export type Workspace = {
   id: string;
   studioName: string;
@@ -27,7 +31,7 @@ export type Workspace = {
   location: string;
   tagline: string;
   ownerEmail: string;
-};
+} & StudioBranding;
 
 export type Account = {
   workspaceId: string;
@@ -38,7 +42,7 @@ export type Account = {
   location: string;
   tagline: string;
   role: Role;
-};
+} & StudioBranding;
 
 export type StoredAccount = Account & {
   password?: string;

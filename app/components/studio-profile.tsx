@@ -2,24 +2,26 @@
 
 import { FormEvent } from "react";
 import type { Account } from "../lib/types";
-import { studioInitials } from "../lib/accounts";
 import { Field, FormPanel } from "./ui";
+import { StudioBrandMark } from "./studio-brand";
+import type { StudioBranding } from "../lib/types";
 
 export function StudioProfileCard({
   account,
   compact = false,
 }: {
-  account: Pick<Account, "studioName" | "name" | "email" | "phone" | "location" | "tagline">;
+  account: Pick<Account, "studioName" | "name" | "email" | "phone" | "location" | "tagline"> & StudioBranding;
   compact?: boolean;
 }) {
-  const initials = studioInitials(account.studioName);
   const meta = [account.location, account.phone].filter(Boolean).join(" · ");
 
   return (
     <article className={compact ? "studio-profile studio-profile--compact" : "studio-profile"}>
-      <div className="studio-profile__avatar" aria-hidden>
-        {initials}
-      </div>
+      <StudioBrandMark
+        studioName={account.studioName}
+        branding={account}
+        className="studio-profile__avatar"
+      />
       <div className="studio-profile__body">
         <p className="studio-profile__kicker">Studio profile</p>
         <h3>{account.studioName}</h3>

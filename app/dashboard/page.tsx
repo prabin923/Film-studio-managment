@@ -27,7 +27,11 @@ import {
   apiSaveStore,
   apiUpdateProfile,
 } from "../lib/api-client";
-import { isStudioProfileComplete, normalizeAccount, studioInitials } from "../lib/accounts";
+import { isStudioProfileComplete, normalizeAccount } from "../lib/accounts";
+import { normalizeStudioBranding } from "../lib/studio-branding";
+import { StudioSidebarBrand } from "../components/studio-brand";
+import { StudioBrandingForm } from "../components/studio-branding-form";
+import type { StudioBranding } from "../lib/types";
 import { ProjectCard } from "../components/project-card";
 import {
   Badge,
@@ -87,6 +91,8 @@ export default function DashboardPage() {
   const [profileSetupError, setProfileSetupError] = useState("");
   const [managerInvitePending, setManagerInvitePending] = useState(false);
   const [managerInviteError, setManagerInviteError] = useState("");
+  const [brandingPending, setBrandingPending] = useState(false);
+  const [brandingError, setBrandingError] = useState("");
   const [workspaceTeam, setWorkspaceTeam] = useState<{ manager: Account | null; owner: Account | null }>({
     manager: null,
     owner: null,
@@ -455,6 +461,30 @@ export default function DashboardPage() {
     }
   };
 
+  const handleSaveBranding = async (branding: StudioBranding) => {
+    if (!account) return;
+
+    setBrandingPending(true);
+    setBrandingError("");
+
+    try {
+      const result = await apiUpdateProfile({
+        name: account.name,
+        email: account.email,
+        studioName: account.studioName,
+        phone: account.phone,
+        location: account.location,
+        tagline: account.tagline,
+        branding: normalizeStudioBranding(branding),
+      });
+      setAccount(normalizeAccount(result.account));
+    } catch (error) {
+      setBrandingError(error instanceof Error ? error.message : "Failed to save branding.");
+    } finally {
+      setBrandingPending(false);
+    }
+  };
+
   const updateProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!account) return;
@@ -511,15 +541,7 @@ export default function DashboardPage() {
 
       <main className={`app-shell app-shell--admin${showStudioProfileSetup ? " app-shell--dimmed" : ""}`}>
       <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark" aria-hidden>
-            {studioInitials(account.studioName)}
-          </div>
-          <div>
-            <div className="brand-title">{account.studioName}</div>
-            <div className="brand-subtitle">WedStudio OS</div>
-          </div>
-        </div>
+        <StudioSidebarBrand studioName={account.studioName} branding={account} />
         <nav className="nav" aria-label="Main sections">
           {activeNav.map((item) => (
             <button
@@ -640,6 +662,9 @@ export default function DashboardPage() {
             onInviteManager={handleInviteManager}
             managerInvitePending={managerInvitePending}
             managerInviteError={managerInviteError}
+            onSaveBranding={handleSaveBranding}
+            brandingPending={brandingPending}
+            brandingError={brandingError}
           />
         )}
       </section>
@@ -656,6 +681,9 @@ function ProfileSettings({
   onInviteManager,
   managerInvitePending,
   managerInviteError,
+  onSaveBranding,
+  brandingPending,
+  brandingError,
 }: {
   account: Account;
   manager: Account | null;
@@ -664,6 +692,9 @@ function ProfileSettings({
   onInviteManager: (event: FormEvent<HTMLFormElement>) => void;
   managerInvitePending: boolean;
   managerInviteError: string;
+  onSaveBranding: (branding: StudioBranding) => void;
+  brandingPending: boolean;
+  brandingError: string;
 }) {
   const isOwner = account.role === "owner";
 
@@ -704,6 +735,14 @@ function ProfileSettings({
               </p>
             ) : null}
           </div>
+
+          <StudioBrandingForm
+            studioName={account.studioName}
+            branding={account}
+            onSave={onSaveBranding}
+            pending={brandingPending}
+            error={brandingError}
+          />
         </Panel>
       }
       aside={

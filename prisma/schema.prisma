@@ -8,14 +8,18 @@ datasource db {
 }
 
 model Workspace {
-  id         String   @id
-  studioName String
-  phone      String   @default("")
-  location   String   @default("")
-  tagline    String   @default("")
-  ownerEmail String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String   @id
+  studioName     String
+  phone          String   @default("")
+  location       String   @default("")
+  tagline        String   @default("")
+  ownerEmail     String
+  logoData       String   @default("")
+  brandColor     String   @default("#2563eb")
+  brandTextColor String   @default("#ffffff")
+  brandShape     String   @default("rounded")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   accounts  Account[]
   clients   Client[]

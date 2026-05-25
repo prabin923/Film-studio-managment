@@ -2261,23 +2261,129 @@ a.btn--secondary {
   padding: 20px 14px;
 }
 
-.app-shell--admin .brand {
+.app-shell--admin .brand--sidebar {
   flex-direction: column;
   align-items: stretch;
-  gap: 0;
-  padding: 0;
+  gap: 10px;
+  padding: 0 2px 8px;
+  margin-bottom: 4px;
 }
 
-.app-shell--admin .brand-mark {
+.app-shell--admin .brand-mark--sidebar {
   width: 100%;
-  height: 44px;
-  border-radius: var(--radius);
+  min-height: 52px;
+  height: auto;
+  aspect-ratio: auto;
   font-size: 0.8rem;
+  padding: 8px;
 }
 
-.app-shell--admin .brand-title,
-.app-shell--admin .brand-subtitle {
-  display: none;
+.brand-mark__img {
+  width: 100%;
+  height: 100%;
+  min-height: 48px;
+  max-height: 72px;
+  object-fit: contain;
+  display: block;
+}
+
+.brand--sidebar .brand__text {
+  min-width: 0;
+}
+
+.app-shell--admin .brand--sidebar .brand-title {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.app-shell--admin .brand--sidebar .brand-subtitle {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.studio-branding-form {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  display: grid;
+  gap: 14px;
+}
+
+.studio-branding-form__title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.studio-branding-form__desc {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.studio-branding-form__preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-muted);
+}
+
+.brand-mark--preview {
+  width: 64px;
+  min-height: 64px;
+  flex-shrink: 0;
+}
+
+.studio-branding-form__preview-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.studio-branding-form__grid {
+  display: grid;
+  gap: 12px;
+}
+
+.studio-branding-form__logo-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.studio-branding-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.field__hint {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.studio-profile__avatar.brand-mark {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.studio-profile__avatar .brand-mark__img {
+  min-height: 56px;
+  max-height: 56px;
 }
 
 .app-shell--admin .nav-button {

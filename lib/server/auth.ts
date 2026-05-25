@@ -216,3 +216,18 @@ export async function updateWorkspaceProfile(
     data: profile,
   });
 }
+
+export async function updateWorkspaceBranding(
+  workspaceId: string,
+  branding: {
+    logoData: string;
+    brandColor: string;
+    brandTextColor: string;
+    brandShape: string;
+  },
+) {
+  await prisma.workspace.update({
+    where: { id: workspaceId },
+    data: branding,
+  });
+}

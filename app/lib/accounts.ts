@@ -1,4 +1,5 @@
 import { accountsRegistryKey } from "./seed";
+import { DEFAULT_STUDIO_BRANDING, normalizeStudioBranding } from "./studio-branding";
 import type { Account, Role, StoredAccount } from "./types";
 
 export function normalizeRole(role: string): Role {
@@ -7,6 +8,13 @@ export function normalizeRole(role: string): Role {
 }
 
 export function normalizeAccount(account: Partial<Account> & Pick<Account, "email">): Account {
+  const branding = normalizeStudioBranding({
+    logoData: account.logoData,
+    brandColor: account.brandColor,
+    brandTextColor: account.brandTextColor,
+    brandShape: account.brandShape,
+  });
+
   return {
     workspaceId: String(account.workspaceId || "").trim(),
     name: String(account.name || "").trim() || account.email.split("@")[0] || "Studio member",
@@ -16,7 +24,18 @@ export function normalizeAccount(account: Partial<Account> & Pick<Account, "emai
     location: String(account.location || "").trim(),
     tagline: String(account.tagline || "").trim(),
     role: normalizeRole(account.role || "owner"),
+    ...branding,
   };
+}
+
+export function accountWithDefaultBranding(account: Account): Account {
+  return normalizeAccount({
+    ...account,
+    logoData: account.logoData || DEFAULT_STUDIO_BRANDING.logoData,
+    brandColor: account.brandColor || DEFAULT_STUDIO_BRANDING.brandColor,
+    brandTextColor: account.brandTextColor || DEFAULT_STUDIO_BRANDING.brandTextColor,
+    brandShape: account.brandShape || DEFAULT_STUDIO_BRANDING.brandShape,
+  });
 }
 
 export function loadAccountsRegistry(): Record<string, StoredAccount> {

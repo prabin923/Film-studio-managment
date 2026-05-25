@@ -1,3 +1,4 @@
+import { brandingFromWorkspace } from "@/app/lib/studio-branding";
 import { prisma } from "@/lib/prisma";
 import type { Account, Client, Expense, InventoryItem, Rental, Staff, Store } from "@/app/lib/types";
 
@@ -89,6 +90,10 @@ export function accountFromWorkspaceRow(
     phone: string;
     location: string;
     tagline: string;
+    logoData?: string | null;
+    brandColor?: string | null;
+    brandTextColor?: string | null;
+    brandShape?: string | null;
   },
   account: Pick<Account, "name" | "email" | "role">,
 ): Account {
@@ -101,5 +106,6 @@ export function accountFromWorkspaceRow(
     phone: workspace.phone,
     location: workspace.location,
     tagline: workspace.tagline,
+    ...brandingFromWorkspace(workspace),
   };
 }

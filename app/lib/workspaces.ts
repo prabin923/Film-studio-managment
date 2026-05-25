@@ -2,6 +2,7 @@ import { newId } from "./format";
 import { accountsRegistryKey, seed, storageKey, workspaceStoreKey, workspacesRegistryKey } from "./seed";
 import type { Account, Store, StoredAccount, Workspace } from "./types";
 import { getStoredAccount, loadAccountsRegistry, normalizeAccount, saveAccountToRegistry } from "./accounts";
+import { DEFAULT_STUDIO_BRANDING } from "./studio-branding";
 
 export function loadWorkspacesRegistry(): Record<string, Workspace> {
   if (typeof window === "undefined") return {};
@@ -57,6 +58,10 @@ export function accountFromWorkspace(workspace: Workspace, account: Pick<Account
     phone: workspace.phone,
     location: workspace.location,
     tagline: workspace.tagline,
+    logoData: workspace.logoData,
+    brandColor: workspace.brandColor,
+    brandTextColor: workspace.brandTextColor,
+    brandShape: workspace.brandShape,
   });
 }
 
@@ -68,9 +73,13 @@ export function getWorkspaceManager(workspaceId: string): StoredAccount | null {
   return getWorkspaceMembers(workspaceId).find((account) => account.role === "manager") ?? null;
 }
 
-export function createWorkspace(input: Omit<Workspace, "id">): Workspace {
+export function createWorkspace(
+  input: Pick<Workspace, "studioName" | "phone" | "location" | "tagline" | "ownerEmail"> &
+    Partial<Pick<Workspace, "logoData" | "brandColor" | "brandTextColor" | "brandShape">>,
+): Workspace {
   const workspace: Workspace = {
     id: newId("workspace"),
+    ...DEFAULT_STUDIO_BRANDING,
     ...input,
     ownerEmail: input.ownerEmail.trim().toLowerCase(),
   };
@@ -89,6 +98,10 @@ export function syncWorkspaceProfile(workspaceId: string, profile: Omit<Workspac
     phone: profile.phone,
     location: profile.location,
     tagline: profile.tagline,
+    logoData: profile.logoData ?? workspace.logoData,
+    brandColor: profile.brandColor ?? workspace.brandColor,
+    brandTextColor: profile.brandTextColor ?? workspace.brandTextColor,
+    brandShape: profile.brandShape ?? workspace.brandShape,
   };
   saveWorkspace(updated);
 

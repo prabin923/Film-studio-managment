@@ -95,6 +95,12 @@ export async function apiUpdateProfile(payload: {
   phone: string;
   location: string;
   tagline: string;
+  branding?: {
+    logoData: string;
+    brandColor: string;
+    brandTextColor: string;
+    brandShape: string;
+  };
 }) {
   return parseJson<{ account: Account }>(
     await apiFetch("/api/profile", {

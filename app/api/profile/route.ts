@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
-import { getAccountByEmail, updateWorkspaceProfile } from "@/lib/server/auth";
+import { normalizeStudioBranding, validateLogoData } from "@/app/lib/studio-branding";
+import { getAccountByEmail, updateWorkspaceBranding, updateWorkspaceProfile } from "@/lib/server/auth";
 import { getSession } from "@/lib/server/session";
 
 export async function PATCH(request: Request) {
@@ -39,6 +40,15 @@ export async function PATCH(request: Request) {
 
     if (current.role === "owner") {
       await updateWorkspaceProfile(session.workspaceId, { studioName, phone, location, tagline });
+    }
+
+    if (body.branding !== undefined) {
+      const branding = normalizeStudioBranding(body.branding);
+      const logoError = validateLogoData(branding.logoData);
+      if (logoError) {
+        return NextResponse.json({ error: logoError }, { status: 400 });
+      }
+      await updateWorkspaceBranding(session.workspaceId, branding);
     }
 
     const account = await getAccountByEmail(email);
