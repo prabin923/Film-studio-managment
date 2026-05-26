@@ -33,13 +33,7 @@ export function LandingProductTabs() {
         ))}
       </div>
       <div className="m-products__visual">
-        {MERCURY_PRODUCTS.map((product) => (
-          <LandingDashboardPreview
-            key={product.id}
-            moduleId={product.id}
-            active={activeId === product.id}
-          />
-        ))}
+        <LandingDashboardPreview moduleId={activeId} active />
       </div>
     </div>
   );

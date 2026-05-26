@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { animate } from "animejs";
+import gsap from "gsap";
 import { AdminRevenueChart } from "./admin-dashboard";
 import { ProjectCard } from "./project-card";
 import { money } from "../lib/format";
-import { prefersReducedMotion } from "../lib/anime-motion";
+import { prefersReducedMotion } from "../lib/motion-utils";
 import { seed } from "../lib/seed";
 import { Panel, PanelHead } from "./ui";
 
@@ -61,68 +61,13 @@ function HeroDashboardMini() {
 export function LandingHeroDevice() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const deviceRef = useRef<HTMLDivElement>(null);
-  const screenInnerRef = useRef<HTMLDivElement>(null);
   const tiltRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    const wrap = wrapRef.current;
     const device = deviceRef.current;
-    const screenInner = screenInnerRef.current;
-    const hero = wrap?.closest(".m-hero");
-    if (!wrap || !device || !screenInner || !hero) return;
-
-    const reduced = prefersReducedMotion();
-
-    if (!reduced) {
-      animate(device, {
-        y: [20, 0],
-        opacity: [1, 1],
-        duration: 900,
-        delay: 200,
-        ease: "out(4)",
-      });
-
-      animate(screenInner, {
-        scale: [1.08, 1],
-        duration: 1100,
-        delay: 320,
-        ease: "out(4)",
-      });
-
-      const glow = wrap.querySelector(".m-hero__device-glow");
-      if (glow) {
-        animate(glow, {
-          opacity: [0, 1],
-          scale: [0.9, 1],
-          duration: 1200,
-          delay: 350,
-          ease: "out(3)",
-        });
-      }
-    }
-
-    let frame = 0;
-    const onScroll = () => {
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        const rect = hero.getBoundingClientRect();
-        const vh = window.innerHeight;
-        const progress = Math.max(0, Math.min(1, 1 - rect.bottom / (vh * 1.1)));
-        const zoom = 1 + progress * 0.08;
-        const lift = progress * -12;
-
-        screenInner.style.transform = reduced
-          ? "scale(1)"
-          : `scale(${zoom}) translate3d(0, ${progress * -4}px, 0)`;
-        device.style.transform = reduced
-          ? ""
-          : `translate3d(0, ${lift}px, 0) rotateX(${tiltRef.current.x}deg) rotateY(${tiltRef.current.y}deg)`;
-      });
-    };
+    if (!device || prefersReducedMotion()) return;
 
     const onMove = (e: MouseEvent) => {
-      if (reduced) return;
       const rect = device.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
@@ -132,25 +77,32 @@ export function LandingHeroDevice() {
         x: Math.max(-5, Math.min(5, -dy * 4)),
         y: Math.max(-6, Math.min(6, dx * 5)),
       };
-      onScroll();
+      gsap.to(device, {
+        rotateX: tiltRef.current.x,
+        rotateY: tiltRef.current.y,
+        duration: 0.35,
+        ease: "power2.out",
+        transformPerspective: 900,
+      });
     };
 
     const onLeave = () => {
       tiltRef.current = { x: 0, y: 0 };
-      onScroll();
+      gsap.to(device, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      });
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
     device.addEventListener("mousemove", onMove);
     device.addEventListener("mouseleave", onLeave);
-    onScroll();
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
       device.removeEventListener("mousemove", onMove);
       device.removeEventListener("mouseleave", onLeave);
-      screenInner.style.transform = "";
-      device.style.transform = "";
+      gsap.set(device, { clearProps: "transform" });
     };
   }, []);
 
@@ -163,7 +115,7 @@ export function LandingHeroDevice() {
             <div className="m-hero__laptop-camera" aria-hidden />
             <div className="m-hero__screen-bezel">
               <div className="m-hero__screen">
-                <div className="m-hero__screen-inner" ref={screenInnerRef}>
+                <div className="m-hero__screen-inner">
                   <HeroDashboardMini />
                 </div>
                 <div className="m-hero__screen-shine" aria-hidden />

@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "sync-styles": "cp app/globals.css public/globals.css",
-    "dev": "npm run sync-styles && WATCHPACK_POLLING=true next dev",
-    "dev:clean": "rm -rf .next node_modules/.cache && npm run sync-styles && WATCHPACK_POLLING=true next dev",
+    "dev": "node scripts/prepare-dev.mjs && npm run sync-styles && WATCHPACK_POLLING=true next dev",
+    "dev:clean": "node scripts/prepare-dev.mjs && rm -rf .next node_modules/.cache && npm run sync-styles && WATCHPACK_POLLING=true next dev",
     "build": "npm run sync-styles && prisma generate && node scripts/migrate-deploy.mjs && next build",
     "start": "next start",
     "lint": "next lint",
@@ -28,7 +28,8 @@
     "@types/react-dom": "^18.3.0",
     "animejs": "^4.4.1",
     "dotenv": "^16.5.0",
-    "next": "^14.2.3",
+    "gsap": "^3.15.0",
+    "next": "14.2.35",
     "pg": "^8.16.0",
     "prisma": "^7.8.0",
     "react": "^18.3.1",
@@ -39,7 +40,7 @@
     "@types/node": "^20.12.12",
     "@types/pg": "^8.15.2",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.3",
+    "eslint-config-next": "14.2.35",
     "tsx": "^4.19.4"
   }
 }

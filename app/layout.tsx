@@ -3,6 +3,7 @@ import Script from "next/script";
 import { ThemeProvider } from "./components/theme-provider";
 import { THEME_STORAGE_KEY } from "./lib/theme";
 import "./globals.css";
+import "./mercury-landing.css";
 
 const themeInitScript = `(function(){try{var k=${JSON.stringify(THEME_STORAGE_KEY)};var t=localStorage.getItem(k);var d=t==="dark"||(t!=="light"&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.classList.toggle("dark",d);}catch(e){}})();`;
 

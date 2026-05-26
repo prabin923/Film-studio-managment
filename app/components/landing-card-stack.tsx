@@ -1,9 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { animate } from "animejs";
-import { prefersReducedMotion } from "../lib/anime-motion";
 import { MERCURY_SHOWCASE, type MercuryShowcaseId } from "../lib/mercury-landing-content";
+import { prefersReducedMotion } from "../lib/motion-utils";
 import { LandingShowcasePreview } from "./landing-showcase-preview";
 
 const STEP_LABELS = ["01", "02", "03", "04"] as const;
@@ -14,44 +13,43 @@ export function LandingCardStack() {
   const activeId = MERCURY_SHOWCASE[activeIndex]?.id ?? "book";
 
   const selectIndex = useCallback((index: number) => {
-    setActiveIndex(index);
+    setActiveIndex((prev) => (prev === index ? prev : index));
   }, []);
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section || prefersReducedMotion()) return;
 
-    const onScroll = () => {
-      const rect = section.getBoundingClientRect();
-      const vh = window.innerHeight;
-      const scrollable = rect.height - vh * 0.35;
-      if (scrollable <= 0) return;
+    let frame = 0;
+    let lastIdx = 0;
 
-      const progress = Math.max(0, Math.min(1, (vh * 0.4 - rect.top) / scrollable));
-      const idx = Math.min(
-        MERCURY_SHOWCASE.length - 1,
-        Math.floor(progress * MERCURY_SHOWCASE.length),
-      );
-      setActiveIndex(idx);
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const scrollable = rect.height - vh * 0.35;
+        if (scrollable <= 0) return;
+
+        const progress = Math.max(0, Math.min(1, (vh * 0.4 - rect.top) / scrollable));
+        const idx = Math.min(
+          MERCURY_SHOWCASE.length - 1,
+          Math.floor(progress * MERCURY_SHOWCASE.length),
+        );
+        if (idx !== lastIdx) {
+          lastIdx = idx;
+          setActiveIndex(idx);
+        }
+      });
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    if (prefersReducedMotion()) return;
-    const stage = sectionRef.current?.querySelector(".m-showcase-v2__stage");
-    if (!stage) return;
-
-    animate(stage, {
-      opacity: [0, 1],
-      y: [24, 0],
-      scale: [0.97, 1],
-      duration: 800,
-      ease: "out(4)",
-    });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
@@ -101,13 +99,11 @@ export function LandingCardStack() {
               </span>
             </div>
             <div className="m-showcase-v2__previews">
-              {MERCURY_SHOWCASE.map((item) => (
-                <LandingShowcasePreview
-                  key={item.id}
-                  id={item.id as MercuryShowcaseId}
-                  active={activeId === item.id}
-                />
-              ))}
+              <LandingShowcasePreview
+                key={activeId}
+                id={activeId as MercuryShowcaseId}
+                active
+              />
             </div>
           </div>
           <div className="m-showcase-v2__progress" aria-hidden>

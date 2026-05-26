@@ -7,7 +7,6 @@ import { useEffect, useRef } from "react";
 import { initLandingAnimations } from "../lib/anime-motion";
 import {
   MERCURY_HERO_IMAGE,
-  MERCURY_STATS,
   MERCURY_TRUST,
 } from "../lib/mercury-landing-content";
 import { LandingCardStack } from "./landing-card-stack";
@@ -15,6 +14,7 @@ import { LandingHeroDevice } from "./landing-hero-device";
 import { LandingHowItWorks } from "./landing-how-it-works";
 import { LandingProductTabs } from "./landing-product-tabs";
 import { LandingShimmerButton } from "./landing-shimmer-button";
+import { LandingStatsSection } from "./landing-stats-section";
 import { LandingTestimonials } from "./landing-testimonials";
 
 const inter = Inter({
@@ -62,7 +62,7 @@ export function LandingPage() {
       ref={rootRef}
       className={`landing landing--mercury ${inter.variable} ${manrope.variable}`}
     >
-      <header className="landing-nav landing-nav--animate">
+      <header className="landing-nav">
         <Link href="/" className="landing-brand">
           <span className="landing-brand__mark" aria-hidden>
             WS
@@ -217,21 +217,7 @@ export function LandingPage() {
 
       <LandingHowItWorks />
 
-      <section className="m-section m-section--wide">
-        <div className="m-section__head m-reveal">
-          <h2>You&apos;re building something lasting. So is your ledger.</h2>
-        </div>
-        <div className="m-stats m-reveal landing-stats">
-          {MERCURY_STATS.map((stat) => (
-            <article key={stat.label} className="m-stat landing-stat">
-              <p className="m-stat__value" data-count-target={stat.value}>
-                0
-              </p>
-              <p className="m-stat__label">{stat.label}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <LandingStatsSection />
 
       <section className="m-section">
         <div className="m-section__head m-reveal">

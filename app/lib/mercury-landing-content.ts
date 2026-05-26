@@ -98,10 +98,34 @@ export const MERCURY_TESTIMONIALS = [
 ] as const;
 
 export const MERCURY_STATS = [
-  { value: "6", label: "Core modules", suffix: "" },
-  { value: "2", label: "Team roles", suffix: "" },
-  { value: "NPR", label: "Local currency", suffix: "" },
-  { value: "1", label: "Shared workspace", suffix: "" },
+  {
+    id: "modules",
+    value: "6",
+    label: "Core modules",
+    detail: "Clients, payroll, gear, rentals, expenses & reports",
+    featured: true,
+  },
+  {
+    id: "roles",
+    value: "2",
+    label: "Team roles",
+    detail: "Owner and manager on one ledger",
+    featured: false,
+  },
+  {
+    id: "currency",
+    value: "NPR",
+    label: "Local currency",
+    detail: "Paisa-precise totals in Nepalese Rupees",
+    featured: false,
+  },
+  {
+    id: "workspace",
+    value: "1",
+    label: "Shared workspace",
+    detail: "One studio, synced from any browser",
+    featured: false,
+  },
 ] as const;
 
 export const MERCURY_STEPS = [
