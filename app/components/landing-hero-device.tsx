@@ -59,50 +59,26 @@ function HeroDashboardMini() {
 
 export function LandingHeroDevice() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const laptopRef = useRef<HTMLDivElement>(null);
   const screenInnerRef = useRef<HTMLDivElement>(null);
-  const tiltRef = useRef({ x: 0, y: 0 });
-  const scrollRef = useRef({ lift: 0, scale: 1, zoom: 1, progress: 0 });
 
   useEffect(() => {
     const wrap = wrapRef.current;
-    const laptop = laptopRef.current;
     const screenInner = screenInnerRef.current;
     const hero = wrap?.closest(".m-hero");
-    if (!wrap || !laptop || !screenInner || !hero) return;
+    if (!wrap || !screenInner || !hero) return;
 
     const reduced = prefersReducedMotion();
     if (reduced) return;
 
     let scrollFrame = 0;
 
-    const applyTransforms = () => {
-      const { x: tiltX, y: tiltY } = tiltRef.current;
-      const { lift, scale, zoom } = scrollRef.current;
-
-      laptop.style.transform = [
-        `perspective(1100px)`,
-        `rotateX(${tiltX}deg)`,
-        `rotateY(${tiltY}deg)`,
-        `translate3d(0, ${lift}px, 0)`,
-        `scale(${scale})`,
-      ].join(" ");
-
-      screenInner.style.transform = `scale(${zoom}) translate3d(0, ${scrollRef.current.progress * -4}px, 0)`;
-    };
-
     const updateScroll = () => {
       const rect = hero.getBoundingClientRect();
       const vh = window.innerHeight;
       const progress = Math.max(0, Math.min(1, 1 - rect.bottom / (vh * 1.1)));
 
-      scrollRef.current = {
-        progress,
-        zoom: 1 + progress * 0.1,
-        lift: progress * -20,
-        scale: 1 - progress * 0.03,
-      };
-      applyTransforms();
+      // Only apply scroll-based lift/scale — tilt is handled by gsap-motion.ts
+      screenInner.style.transform = `scale(${1 + progress * 0.1}) translate3d(0, ${progress * -4}px, 0)`;
     };
 
     const onScroll = () => {
@@ -113,36 +89,12 @@ export function LandingHeroDevice() {
       });
     };
 
-    const onPointerMove = (e: PointerEvent) => {
-      const rect = laptop.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = (e.clientX - cx) / (rect.width / 2);
-      const dy = (e.clientY - cy) / (rect.height / 2);
-
-      tiltRef.current = {
-        x: Math.max(-10, Math.min(10, -dy * 8)),
-        y: Math.max(-12, Math.min(12, dx * 10)),
-      };
-      applyTransforms();
-    };
-
-    const onPointerLeave = () => {
-      tiltRef.current = { x: 0, y: 0 };
-      applyTransforms();
-    };
-
     window.addEventListener("scroll", onScroll, { passive: true });
-    wrap.addEventListener("pointermove", onPointerMove);
-    wrap.addEventListener("pointerleave", onPointerLeave);
     updateScroll();
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      wrap.removeEventListener("pointermove", onPointerMove);
-      wrap.removeEventListener("pointerleave", onPointerLeave);
       if (scrollFrame) cancelAnimationFrame(scrollFrame);
-      laptop.style.transform = "";
       screenInner.style.transform = "";
     };
   }, []);
@@ -153,7 +105,7 @@ export function LandingHeroDevice() {
         <div className="m-hero__device-glow" aria-hidden />
         <div className="m-hero__device-perspective">
           <div className="m-hero__device">
-            <div className="m-hero__laptop" ref={laptopRef}>
+            <div className="m-hero__laptop">
               <div className="m-hero__laptop-camera" aria-hidden />
               <div className="m-hero__screen-bezel">
                 <div className="m-hero__screen">

@@ -62,6 +62,7 @@ export function LandingPage() {
       ref={rootRef}
       className={`landing landing--mercury ${inter.variable} ${manrope.variable}`}
     >
+      <div className="m-scroll-progress" aria-hidden />
       <header className="landing-nav">
         <Link href="/" className="landing-brand">
           <span className="landing-brand__mark" aria-hidden>

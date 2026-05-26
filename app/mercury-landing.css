@@ -1,5 +1,27 @@
 /* Mercury-inspired landing — scoped to .landing--mercury */
 
+/* ── Scroll progress bar ── */
+.m-scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 100;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--m-accent, #5266eb), #a5b4fc, var(--m-accent, #5266eb));
+  background-size: 200% 100%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m-scroll-progress {
+    display: none;
+  }
+}
+
 /* Override legacy landing globals that hide nav/copy before JS runs */
 .landing--mercury .landing-nav--animate,
 .landing--mercury .landing-hero__anim {
@@ -231,25 +253,9 @@
   max-height: 100%;
   margin: 0 auto;
   transform-style: preserve-3d;
-  transform-origin: 50% 80%;
-  will-change: transform;
+  transform-origin: 50% 50%;
   backface-visibility: hidden;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .m-hero__laptop {
-    animation: m-hero-float 5.5s ease-in-out infinite;
-  }
-}
-
-@keyframes m-hero-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  perspective: 1100px;
 }
 
 .m-hero__laptop-camera {
@@ -794,6 +800,25 @@
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin: 0 0 16px;
+}
+
+/* Heading shimmer — animated gradient sweep after reveal */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .m-heading-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--m-text) 0%,
+      var(--m-text) 40%,
+      #a5b4fc 50%,
+      var(--m-text) 60%,
+      var(--m-text) 100%
+    );
+    background-size: 250% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 .m-section__head p {
@@ -1479,6 +1504,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+  perspective: 800px;
 }
 
 @media (max-width: 900px) {
@@ -1492,7 +1518,8 @@
   border: 1px solid var(--m-border);
   background: var(--m-surface);
   overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
+  transform-style: preserve-3d;
+  transition: border-color 0.3s ease;
 }
 
 .m-workflow-card:hover {
@@ -2088,6 +2115,10 @@
   font-size: 0.92rem;
   line-height: 1.6;
   margin: 0;
+}
+
+.m-faq__item--animating p {
+  overflow: hidden;
 }
 
 /* Final CTA */
