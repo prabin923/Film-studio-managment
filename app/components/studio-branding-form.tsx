@@ -27,9 +27,12 @@ export function StudioBrandingForm({
   const [draft, setDraft] = useState<StudioBranding>(branding);
   const [logoError, setLogoError] = useState("");
 
+  const { logoData, brandColor, brandTextColor, brandShape } = branding;
+
+  // Sync draft only when the underlying prop values actually change in the parent/db
   useEffect(() => {
-    setDraft(branding);
-  }, [branding]);
+    setDraft({ logoData, brandColor, brandTextColor, brandShape });
+  }, [logoData, brandColor, brandTextColor, brandShape]);
 
   const handleLogoChange = async (file: File | undefined) => {
     if (!file) return;

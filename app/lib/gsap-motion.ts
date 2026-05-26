@@ -128,7 +128,7 @@ function revealBlock(target: Element) {
     const stage = target.querySelector(".m-showcase-v2__stage");
     const steps = target.querySelectorAll(".m-showcase-v2__step");
     gsap.fromTo(
-      target.querySelectorAll(".m-showcase-v2__eyebrow, .m-showcase-v2__copy h2"),
+      target.querySelectorAll(".m-showcase-v2__eyebrow, .m-section__head h2"),
       { y: 20, opacity: 0 },
       { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "power3.out" },
     );

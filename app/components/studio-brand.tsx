@@ -24,7 +24,7 @@ export function StudioBrandMark({
 
   if (branding.logoData) {
     return (
-      <div className={classes} style={{ borderRadius: radius, overflow: "hidden" }}>
+      <div className={classes} style={{ borderRadius: radius, overflow: "hidden", background: "transparent" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={branding.logoData} alt="" className="brand-mark__img" />
       </div>

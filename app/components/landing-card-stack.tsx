@@ -54,10 +54,13 @@ export function LandingCardStack() {
 
   return (
     <section ref={sectionRef} className="m-showcase-v2 m-section m-section--wide m-reveal">
+      <div className="m-section__head">
+        <p className="m-showcase-v2__eyebrow">How teams work</p>
+        <h2>Studio ops used to be scattered. Now it&apos;s one workspace.</h2>
+      </div>
+
       <div className="m-showcase-v2__sticky">
         <div className="m-showcase-v2__copy">
-          <p className="m-showcase-v2__eyebrow">How teams work</p>
-          <h2>Studio ops used to be scattered. Now it&apos;s one workspace.</h2>
           <div className="m-showcase-v2__steps" role="tablist" aria-label="Studio workflows">
             {MERCURY_SHOWCASE.map((item, index) => (
               <button
