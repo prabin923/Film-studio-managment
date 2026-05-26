@@ -18,6 +18,8 @@ model Workspace {
   brandColor     String   @default("#2563eb")
   brandTextColor String   @default("#ffffff")
   brandShape     String   @default("rounded")
+  currency       String   @default("NPR")
+  locale         String   @default("en-NP")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 

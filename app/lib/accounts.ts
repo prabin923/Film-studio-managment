@@ -24,6 +24,8 @@ export function normalizeAccount(account: Partial<Account> & Pick<Account, "emai
     location: String(account.location || "").trim(),
     tagline: String(account.tagline || "").trim(),
     role: normalizeRole(account.role || "owner"),
+    currency: String(account.currency || "NPR").trim(),
+    locale: String(account.locale || "en-NP").trim(),
     ...branding,
   };
 }

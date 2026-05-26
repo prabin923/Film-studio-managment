@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { Field, FormPanel } from "./ui";
-import { money } from "../lib/format";
+import { money, getGlobalCurrency } from "../lib/format";
 import type { InventoryItem } from "../lib/types";
 import { today } from "../lib/seed";
 
@@ -54,6 +54,7 @@ export function RentalForm({
   inventory: InventoryItem[];
   onSubmit: (payload: NewRentalPayload) => void;
 }) {
+  const currency = getGlobalCurrency();
   const rentableItems = useMemo(() => inventory.filter((item) => item.status === "Available"), [inventory]);
   const [startDate, setStartDate] = useState(today);
   const [endDate, setEndDate] = useState(today);
@@ -173,7 +174,7 @@ export function RentalForm({
       <div className="rental-lines field--wide">
         <div className="rental-lines__head">
           <span className="field__label">Gear items</span>
-          {lineTotal > 0 ? <span className="rental-lines__total">Rent total · NPR {lineTotal.toLocaleString()}</span> : null}
+          {lineTotal > 0 ? <span className="rental-lines__total">Rent total · {currency} {lineTotal.toLocaleString()}</span> : null}
         </div>
 
         {rentableItems.length === 0 ? (
@@ -211,7 +212,7 @@ export function RentalForm({
                     </select>
                   </label>
                   <label className="rental-line__field">
-                    <span>Rent (NPR)</span>
+                    <span>Rent ({currency})</span>
                     <input
                       min="0"
                       type="number"
@@ -231,10 +232,10 @@ export function RentalForm({
         </button>
       </div>
 
-      <Field label="Deposit (NPR)">
+      <Field label={`Deposit (${currency})`}>
         <input name="deposit" min="0" type="number" placeholder="Once per booking" />
       </Field>
-      <Field label="Paid (NPR)">
+      <Field label={`Paid (${currency})`}>
         <input name="paidAmount" min="0" type="number" placeholder="Split across items" />
       </Field>
     </FormPanel>

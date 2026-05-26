@@ -20,6 +20,8 @@ export async function PATCH(request: Request) {
     const phone = String(body.phone || "");
     const location = String(body.location || "");
     const tagline = String(body.tagline || "");
+    const currency = body.currency ? String(body.currency).trim() : undefined;
+    const locale = body.locale ? String(body.locale).trim() : undefined;
 
     const current = await prisma.account.findUnique({ where: { email: session.email } });
     if (!current) {
@@ -39,7 +41,14 @@ export async function PATCH(request: Request) {
     });
 
     if (current.role === "owner") {
-      await updateWorkspaceProfile(session.workspaceId, { studioName, phone, location, tagline });
+      await updateWorkspaceProfile(session.workspaceId, {
+        studioName,
+        phone,
+        location,
+        tagline,
+        currency,
+        locale,
+      });
     }
 
     if (body.branding !== undefined) {

@@ -186,7 +186,7 @@ function ReportsPreview({ active }: { active: boolean }) {
           <AnalyticsCharts store={seed} />
         </section>
         <Panel className="admin-panel m-dashboard-preview__panel">
-          <PanelHead title="Financial snapshot" description="Recorded totals in NPR." />
+          <PanelHead title="Financial snapshot" description="Recorded totals in your selected currency." />
           <div className="report-grid">
             {reportRows.map((row) => (
               <div className="report-cell" key={row[0]}>

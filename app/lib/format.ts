@@ -1,7 +1,19 @@
+let currentCurrency = "NPR";
+let currentLocale = "en-NP";
+
+export function setGlobalCurrency(currency: string, locale: string) {
+  currentCurrency = currency || "NPR";
+  currentLocale = locale || "en-NP";
+}
+
+export function getGlobalCurrency() {
+  return currentCurrency;
+}
+
 export function money(paisa: number) {
-  return new Intl.NumberFormat("en-NP", {
+  return new Intl.NumberFormat(currentLocale, {
     style: "currency",
-    currency: "NPR",
+    currency: currentCurrency,
     maximumFractionDigits: 0,
   }).format(Math.round(paisa / 100));
 }

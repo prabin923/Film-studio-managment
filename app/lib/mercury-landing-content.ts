@@ -114,9 +114,9 @@ export const MERCURY_STATS = [
   },
   {
     id: "currency",
-    value: "NPR",
-    label: "Local currency",
-    detail: "Paisa-precise totals in Nepalese Rupees",
+    value: "Global",
+    label: "Multi-currency",
+    detail: "Choose USD, EUR, GBP, INR, NPR, AUD, and more",
     featured: false,
   },
   {

@@ -44,7 +44,7 @@ import {
   SplitLayout,
 } from "../components/ui";
 import { pageCopy } from "../lib/copy";
-import { money, newId, statusTone, toPaisa } from "../lib/format";
+import { money, newId, statusTone, toPaisa, setGlobalCurrency, getGlobalCurrency } from "../lib/format";
 import { nav, seed, today } from "../lib/seed";
 import type {
   Account,
@@ -183,6 +183,12 @@ export default function DashboardPage() {
       router.replace("/login");
     }
   }, [account, loaded, router]);
+
+  useEffect(() => {
+    if (account) {
+      setGlobalCurrency(account.currency, account.locale);
+    }
+  }, [account]);
 
   const stats = useMemo(() => {
     const clientRevenue = store.clients.reduce((sum, item) => sum + item.paidAmount, 0);
@@ -490,6 +496,9 @@ export default function DashboardPage() {
     if (!account) return;
 
     const data = new FormData(event.currentTarget);
+    const selectedCurrencyValue = String(data.get("currency") || "NPR|en-NP");
+    const [currencyCode, localeCode] = selectedCurrencyValue.split("|");
+
     try {
       const result = await apiUpdateProfile({
         name: String(data.get("name") || ""),
@@ -498,7 +507,15 @@ export default function DashboardPage() {
         phone: String(data.get("phone") || ""),
         location: String(data.get("location") || ""),
         tagline: String(data.get("tagline") || ""),
-      });
+        branding: {
+          logoData: account.logoData,
+          brandColor: account.brandColor,
+          brandTextColor: account.brandTextColor,
+          brandShape: account.brandShape,
+        },
+        currency: currencyCode,
+        locale: localeCode,
+      } as any);
       const nextAccount = normalizeAccount(result.account);
       setAccount(nextAccount);
       setRole(nextAccount.role);
@@ -759,6 +776,20 @@ function ProfileSettings({
           <Field label="Tagline" span={2}>
             <input name="tagline" defaultValue={account.tagline} readOnly={!isOwner} />
           </Field>
+          <Field label="Studio currency" span={2}>
+            <select name="currency" defaultValue={`${account.currency}|${account.locale}`} disabled={!isOwner}>
+              <option value="USD|en-US">USD ($) — United States Dollar</option>
+              <option value="EUR|de-DE">EUR (€) — Euro</option>
+              <option value="GBP|en-GB">GBP (£) — British Pound</option>
+              <option value="INR|en-IN">INR (₹) — Indian Rupee</option>
+              <option value="NPR|en-NP">NPR (रू) — Nepalese Rupee</option>
+              <option value="AUD|en-AU">AUD (A$) — Australian Dollar</option>
+              <option value="CAD|en-CA">CAD (C$) — Canadian Dollar</option>
+              <option value="JPY|ja-JP">JPY (¥) — Japanese Yen</option>
+              <option value="SGD|en-SG">SGD (S$) — Singapore Dollar</option>
+              <option value="AED|ar-AE">AED (د.إ) — United Arab Emirates Dirham</option>
+            </select>
+          </Field>
           <Field label="Your name">
             <input name="name" defaultValue={account.name} required />
           </Field>
@@ -794,6 +825,7 @@ function Clients({
   updateClientStatus: (clientId: string, status: ProjectStatus) => void;
   updateClientPaymentStatus: (clientId: string, status: ProjectPaymentStatus) => void;
 }) {
+  const currency = getGlobalCurrency();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | "all">("all");
   const [paymentFilter, setPaymentFilter] = useState<ProjectPaymentStatus | "all">("all");
@@ -935,10 +967,10 @@ function Clients({
                 ))}
               </datalist>
             </Field>
-            <Field label="Package (NPR)">
+            <Field label={`Package (${currency})`}>
               <input name="packageAmount" min="0" type="number" />
             </Field>
-            <Field label="Paid (NPR)">
+            <Field label={`Paid (${currency})`}>
               <input name="paidAmount" min="0" type="number" />
             </Field>
             <Field label="Payment">
@@ -999,10 +1031,10 @@ function Clients({
                 ))}
               </datalist>
             </Field>
-            <Field label="Package (NPR)">
+            <Field label={`Package (${currency})`}>
               <input name="packageAmount" min="0" type="number" defaultValue={nprField(editing.packageAmount)} />
             </Field>
-            <Field label="Paid (NPR)">
+            <Field label={`Paid (${currency})`}>
               <input name="paidAmount" min="0" type="number" defaultValue={nprField(editing.paidAmount)} />
             </Field>
             <Field label="Payment">
@@ -1040,6 +1072,7 @@ function Expenses({
   updateExpense: (id: string, next: Expense) => void;
   deleteExpense: (id: string, label: string) => void;
 }) {
+  const currency = getGlobalCurrency();
   const [editing, setEditing] = useState<Expense | null>(null);
 
   const saveEdit = (event: FormEvent<HTMLFormElement>) => {
@@ -1064,7 +1097,7 @@ function Expenses({
           <Panel>
             <PanelHead
               title="Expense ledger"
-              description="Operating costs logged in NPR."
+              description={`Operating costs logged in ${currency}.`}
               action={<span className="panel-head__meta">{expenses.length} entries</span>}
             />
             {expenses.length === 0 ? (
@@ -1102,7 +1135,7 @@ function Expenses({
           <Field label="Vendor">
             <input name="vendor" required />
           </Field>
-          <Field label="Amount (NPR)">
+          <Field label={`Amount (${currency})`}>
             <input name="amount" min="0" type="number" required />
           </Field>
           <Field label="Notes" span={2}>
@@ -1132,7 +1165,7 @@ function Expenses({
             <Field label="Vendor">
               <input name="vendor" defaultValue={editing.vendor} required />
             </Field>
-            <Field label="Amount (NPR)">
+            <Field label={`Amount (${currency})`}>
               <input name="amount" min="0" type="number" defaultValue={nprField(editing.amount)} required />
             </Field>
             <Field label="Notes" span={2}>
@@ -1158,6 +1191,7 @@ function Salary({
   markSalaryPaid: (id: string) => void;
   deleteStaff: (id: string, label: string) => void;
 }) {
+  const currency = getGlobalCurrency();
   const [editing, setEditing] = useState<Staff | null>(null);
 
   const saveEdit = (event: FormEvent<HTMLFormElement>) => {
@@ -1211,13 +1245,13 @@ function Salary({
           <Field label="Role">
             <input name="role" required />
           </Field>
-          <Field label="Monthly salary (NPR)">
+          <Field label={`Monthly salary (${currency})`}>
             <input name="monthlySalary" min="0" type="number" required />
           </Field>
-          <Field label="Advance (NPR)">
+          <Field label={`Advance (${currency})`}>
             <input name="advance" min="0" type="number" defaultValue="0" />
           </Field>
-          <Field label="Deduction (NPR)">
+          <Field label={`Deduction (${currency})`}>
             <input name="deduction" min="0" type="number" defaultValue="0" />
           </Field>
           <Field label="Status" span={2}>
@@ -1239,13 +1273,13 @@ function Salary({
             <Field label="Role">
               <input name="role" defaultValue={editing.role} required />
             </Field>
-            <Field label="Monthly salary (NPR)">
+            <Field label={`Monthly salary (${currency})`}>
               <input name="monthlySalary" min="0" type="number" defaultValue={nprField(editing.monthlySalary)} required />
             </Field>
-            <Field label="Advance (NPR)">
+            <Field label={`Advance (${currency})`}>
               <input name="advance" min="0" type="number" defaultValue={nprField(editing.advance)} />
             </Field>
-            <Field label="Deduction (NPR)">
+            <Field label={`Deduction (${currency})`}>
               <input name="deduction" min="0" type="number" defaultValue={nprField(editing.deduction)} />
             </Field>
             <Field label="Status" span={2}>
@@ -1274,6 +1308,7 @@ function Inventory({
   deleteItem: (id: string, label: string) => void;
   setInventoryStatus: (id: string, status: ItemStatus) => void;
 }) {
+  const currency = getGlobalCurrency();
   const [editing, setEditing] = useState<InventoryItem | null>(null);
 
   const saveEdit = (event: FormEvent<HTMLFormElement>) => {
@@ -1342,7 +1377,7 @@ function Inventory({
           <Field label="Condition">
             <input name="condition" defaultValue="Good" />
           </Field>
-          <Field label="Day rate (NPR)">
+          <Field label={`Day rate (${currency})`}>
             <input name="dayRate" min="0" type="number" />
           </Field>
           <Field label="Status" span={2}>
@@ -1379,7 +1414,7 @@ function Inventory({
             <Field label="Condition">
               <input name="condition" defaultValue={editing.condition} />
             </Field>
-            <Field label="Day rate (NPR)">
+            <Field label={`Day rate (${currency})`}>
               <input name="dayRate" min="0" type="number" defaultValue={nprField(editing.dayRate)} />
             </Field>
             <Field label="Status" span={2}>
@@ -1442,6 +1477,7 @@ function Rentals({
 }
 
 function Reports({ stats, store }: { stats: Stats; store: Store }) {
+  const currency = getGlobalCurrency();
   const reportRows = [
     ["Client payments", money(stats.clientRevenue)],
     ["Client balance due", money(stats.clientDue)],
@@ -1460,7 +1496,7 @@ function Reports({ stats, store }: { stats: Stats; store: Store }) {
       <SplitLayout
         main={
           <Panel>
-            <PanelHead title="Financial snapshot" description="Recorded totals in NPR." />
+            <PanelHead title="Financial snapshot" description={`Recorded totals in ${currency}.`} />
           <div className="report-grid">
             {reportRows.map((row) => (
               <div className="report-cell" key={String(row[0])}>

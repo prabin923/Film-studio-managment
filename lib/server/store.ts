@@ -94,6 +94,8 @@ export function accountFromWorkspaceRow(
     brandColor?: string | null;
     brandTextColor?: string | null;
     brandShape?: string | null;
+    currency?: string | null;
+    locale?: string | null;
   },
   account: Pick<Account, "name" | "email" | "role">,
 ): Account {
@@ -106,6 +108,8 @@ export function accountFromWorkspaceRow(
     phone: workspace.phone,
     location: workspace.location,
     tagline: workspace.tagline,
+    currency: workspace.currency ?? "NPR",
+    locale: workspace.locale ?? "en-NP",
     ...brandingFromWorkspace(workspace),
   };
 }

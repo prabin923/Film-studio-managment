@@ -31,6 +31,8 @@ export type Workspace = {
   location: string;
   tagline: string;
   ownerEmail: string;
+  currency?: string;
+  locale?: string;
 } & StudioBranding;
 
 export type Account = {
@@ -42,6 +44,8 @@ export type Account = {
   location: string;
   tagline: string;
   role: Role;
+  currency: string;
+  locale: string;
 } & StudioBranding;
 
 export type StoredAccount = Account & {

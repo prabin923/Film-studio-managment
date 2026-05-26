@@ -7,7 +7,7 @@ const ITEMS = [
   "Rentals",
   "Expenses",
   "Monthly reports",
-  "NPR ledger",
+  "Multi-currency ledger",
   "Owner + manager",
   "Cloud sync",
   "CSV export",

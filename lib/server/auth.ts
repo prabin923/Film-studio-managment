@@ -209,7 +209,14 @@ export async function getAccountByEmail(email: string): Promise<Account | null> 
 
 export async function updateWorkspaceProfile(
   workspaceId: string,
-  profile: { studioName: string; phone: string; location: string; tagline: string },
+  profile: {
+    studioName: string;
+    phone: string;
+    location: string;
+    tagline: string;
+    currency?: string;
+    locale?: string;
+  },
 ) {
   await prisma.workspace.update({
     where: { id: workspaceId },

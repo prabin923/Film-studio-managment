@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: "What currency does it use?",
-    a: "Amounts are in Nepalese Rupees (NPR), stored in paisa internally so totals stay precise.",
+    a: "It supports standard worldwide currencies (USD, EUR, GBP, INR, NPR, and more), configurable directly inside your studio settings.",
   },
   {
     q: "What can the manager access?",
@@ -125,7 +125,7 @@ export function LandingPage() {
               </Link>
             </div>
             <p className="m-hero__fine m-hero__anim">
-              Cloud workspace for owners and managers. NPR amounts with paisa precision.
+              Cloud workspace for owners and managers. Multi-currency ledgers with paisa-precise precision.
             </p>
             <div className="m-hero__secondary-actions m-hero__anim">
               <LandingShimmerButton href="/login" variant="ghost">

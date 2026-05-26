@@ -62,6 +62,8 @@ export function accountFromWorkspace(workspace: Workspace, account: Pick<Account
     brandColor: workspace.brandColor,
     brandTextColor: workspace.brandTextColor,
     brandShape: workspace.brandShape,
+    currency: workspace.currency,
+    locale: workspace.locale,
   });
 }
 
@@ -75,11 +77,13 @@ export function getWorkspaceManager(workspaceId: string): StoredAccount | null {
 
 export function createWorkspace(
   input: Pick<Workspace, "studioName" | "phone" | "location" | "tagline" | "ownerEmail"> &
-    Partial<Pick<Workspace, "logoData" | "brandColor" | "brandTextColor" | "brandShape">>,
+    Partial<Pick<Workspace, "logoData" | "brandColor" | "brandTextColor" | "brandShape" | "currency" | "locale">>,
 ): Workspace {
   const workspace: Workspace = {
     id: newId("workspace"),
     ...DEFAULT_STUDIO_BRANDING,
+    currency: "NPR",
+    locale: "en-NP",
     ...input,
     ownerEmail: input.ownerEmail.trim().toLowerCase(),
   };
