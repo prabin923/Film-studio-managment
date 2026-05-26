@@ -44,17 +44,15 @@ function HeroDashboardMini() {
             <strong className="admin-metric__value">{money(netCash)}</strong>
           </article>
         </section>
-        <div className="m-hero-dashboard__split">
-          <div className="m-hero-dashboard__chart">
-            <AdminRevenueChart store={seed} />
-          </div>
-          <Panel className="admin-panel m-hero-dashboard__panel">
-            <PanelHead title="Upcoming work" description="Latest booking" />
-            <div className="project-list">
-              <ProjectCard compact client={client} />
-            </div>
-          </Panel>
+        <div className="m-hero-dashboard__chart">
+          <AdminRevenueChart store={seed} />
         </div>
+        <Panel className="admin-panel m-hero-dashboard__panel">
+          <PanelHead title="Upcoming work" description="Latest booking" />
+          <div className="project-list">
+            <ProjectCard compact client={client} />
+          </div>
+        </Panel>
       </div>
     </div>
   );
@@ -77,18 +75,17 @@ export function LandingHeroDevice() {
 
     if (!reduced) {
       animate(device, {
-        opacity: [0, 1],
-        y: [48, 0],
-        scale: [0.92, 1],
-        duration: 1100,
-        delay: 280,
+        y: [20, 0],
+        opacity: [1, 1],
+        duration: 900,
+        delay: 200,
         ease: "out(4)",
       });
 
       animate(screenInner, {
-        scale: [1.22, 1],
-        duration: 1400,
-        delay: 420,
+        scale: [1.08, 1],
+        duration: 1100,
+        delay: 320,
         ease: "out(4)",
       });
 
@@ -112,16 +109,15 @@ export function LandingHeroDevice() {
         const rect = hero.getBoundingClientRect();
         const vh = window.innerHeight;
         const progress = Math.max(0, Math.min(1, 1 - rect.bottom / (vh * 1.1)));
-        const zoom = 1 + progress * 0.14;
-        const lift = progress * -28;
-        const deviceScale = 1 - progress * 0.04;
+        const zoom = 1 + progress * 0.08;
+        const lift = progress * -12;
 
         screenInner.style.transform = reduced
           ? "scale(1)"
-          : `scale(${zoom}) translate3d(0, ${progress * -6}px, 0)`;
+          : `scale(${zoom}) translate3d(0, ${progress * -4}px, 0)`;
         device.style.transform = reduced
           ? ""
-          : `translate3d(0, ${lift}px, 0) scale(${deviceScale}) rotateX(${tiltRef.current.x}deg) rotateY(${tiltRef.current.y}deg)`;
+          : `translate3d(0, ${lift}px, 0) rotateX(${tiltRef.current.x}deg) rotateY(${tiltRef.current.y}deg)`;
       });
     };
 
@@ -159,7 +155,7 @@ export function LandingHeroDevice() {
   }, []);
 
   return (
-    <div className="m-hero__device-wrap m-hero__anim" ref={wrapRef}>
+    <div className="m-hero__device-wrap m-hero__device-enter" ref={wrapRef}>
       <div className="m-hero__device-glow" aria-hidden />
       <div className="m-hero__device-perspective">
         <div className="m-hero__device" ref={deviceRef}>

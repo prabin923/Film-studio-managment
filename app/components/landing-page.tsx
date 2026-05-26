@@ -8,15 +8,14 @@ import { initLandingAnimations } from "../lib/anime-motion";
 import {
   MERCURY_HERO_IMAGE,
   MERCURY_STATS,
-  MERCURY_STEPS,
   MERCURY_TRUST,
 } from "../lib/mercury-landing-content";
-import "../mercury-landing.css";
 import { LandingCardStack } from "./landing-card-stack";
 import { LandingHeroDevice } from "./landing-hero-device";
+import { LandingHowItWorks } from "./landing-how-it-works";
 import { LandingProductTabs } from "./landing-product-tabs";
+import { LandingShimmerButton } from "./landing-shimmer-button";
 import { LandingTestimonials } from "./landing-testimonials";
-import { ThemeToggle } from "./theme-toggle";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -74,7 +73,6 @@ export function LandingPage() {
           </span>
         </Link>
         <nav className="landing-nav__links" aria-label="Primary">
-          <ThemeToggle className="landing-nav__theme" />
           <a href="#products">Products</a>
           <a href="#workflows">Workflows</a>
           <a href="#how-it-works">How it works</a>
@@ -102,7 +100,8 @@ export function LandingPage() {
           <div className="m-hero__grain" />
         </div>
         <div className="m-hero__layout">
-          <div className="m-hero__inner">
+          <div className="m-hero__copy-zone">
+            <div className="m-hero__inner">
             <p className="m-hero__eyebrow m-hero__anim">Wedding film studio operations</p>
             <h1 className="m-hero__anim">
               Radically clearer
@@ -129,15 +128,18 @@ export function LandingPage() {
               Cloud workspace for owners and managers. NPR amounts with paisa precision.
             </p>
             <div className="m-hero__secondary-actions m-hero__anim">
-              <Link href="/login" className="m-hero__ghost">
+              <LandingShimmerButton href="/login" variant="ghost">
                 Log in
-              </Link>
-              <a href="#products" className="m-hero__ghost">
+              </LandingShimmerButton>
+              <LandingShimmerButton href="#products" variant="ghost">
                 Explore modules
-              </a>
+              </LandingShimmerButton>
+            </div>
             </div>
           </div>
-          <LandingHeroDevice />
+          <div className="m-hero__device-zone">
+            <LandingHeroDevice />
+          </div>
         </div>
       </section>
 
@@ -213,20 +215,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="how-it-works" className="m-section">
-        <div className="m-section__head m-reveal">
-          <h2>Get started fast. And never stop moving.</h2>
-          <p>Register as owner, invite your manager, and run the studio from any browser.</p>
-        </div>
-        <div className="m-steps m-reveal">
-          {MERCURY_STEPS.map((step) => (
-            <article key={step.title} className="m-step">
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-            </article>
-          ))}
-        </div>
-      </section>
+      <LandingHowItWorks />
 
       <section className="m-section m-section--wide">
         <div className="m-section__head m-reveal">

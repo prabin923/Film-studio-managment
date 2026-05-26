@@ -106,19 +106,28 @@ export const MERCURY_STATS = [
 
 export const MERCURY_STEPS = [
   {
+    id: "register",
+    step: "01",
     title: "Register in minutes",
+    tagline: "Create your workspace",
     description:
-      "Create your studio workspace with name, city, and contact details. Your profile appears across the dashboard.",
+      "Add your studio name, city, and contact details. Your branding shows on the dashboard and sidebar right away.",
   },
   {
+    id: "invite",
+    step: "02",
     title: "Invite your manager",
+    tagline: "One ledger, two logins",
     description:
-      "A second email joins the same workspace using the owner email. Both see clients, payroll, and rentals in sync.",
+      "They sign up with their own email plus yours to join the same workspace — clients, payroll, and rentals stay in sync.",
   },
   {
+    id: "run",
+    step: "03",
     title: "Run the studio daily",
+    tagline: "Work from anywhere",
     description:
-      "Log work from any browser. Cloud-backed ledger with CSV export and role-based access for owners and managers.",
+      "Log clients, payroll, gear, and expenses from any browser. Owners get full reports; managers handle day-to-day ops.",
   },
 ] as const;
 

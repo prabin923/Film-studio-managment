@@ -232,13 +232,22 @@ function playMercuryReveal(target: Element, played: WeakSet<Element>) {
     return;
   }
 
-  if (target.classList.contains("m-steps")) {
-    animate(target.querySelectorAll(".m-step"), {
+  if (target.classList.contains("m-how")) {
+    const intro = target.querySelector(".m-how__intro");
+    if (intro) {
+      animate(intro.children, {
+        opacity: [0, 1],
+        x: [-20, 0],
+        duration: 600,
+        delay: stagger(80),
+        ease: "out(3)",
+      });
+    }
+    animate(target.querySelectorAll(".m-how__item"), {
       opacity: [0, 1],
-      y: [24, 0],
-      scale: [0.96, 1],
-      duration: 620,
-      delay: stagger(90),
+      x: [24, 0],
+      duration: 650,
+      delay: stagger(120),
       ease: "out(4)",
     });
     return;
@@ -283,8 +292,11 @@ export function initMercuryLandingAnimations(root: HTMLElement): Cleanup {
   const reduced = prefersReducedMotion();
 
   if (reduced) {
-    showInstant(root.querySelectorAll(".m-hero__anim, .landing-nav--animate, .m-reveal"));
+    showInstant(
+      root.querySelectorAll(".m-hero__anim, .m-hero__device-enter, .landing-nav--animate, .m-reveal"),
+    );
     root.classList.add("is-loaded");
+    root.querySelector(".m-hero")?.classList.add("is-hero-animated");
     return () => {};
   }
 
@@ -298,12 +310,21 @@ export function initMercuryLandingAnimations(root: HTMLElement): Cleanup {
     tl.add(nav, { opacity: [0, 1], y: [-12, 0], duration: 480 }, 0);
   }
 
-  const heroItems = root.querySelectorAll(".m-hero__anim");
+  const heroItems = root.querySelectorAll(".m-hero__copy-zone .m-hero__anim");
   if (heroItems.length) {
-    tl.add(heroItems, { opacity: [0, 1], y: [36, 0], duration: 900, delay: stagger(80) }, 120);
+    tl.add(heroItems, { y: [28, 0], opacity: [1, 1], duration: 800, delay: stagger(70) }, 120);
   }
 
-  setTimeout(() => root.querySelector(".m-hero")?.classList.add("is-loaded"), 500);
+  const deviceEnter = root.querySelector(".m-hero__device-enter");
+  if (deviceEnter) {
+    tl.add(deviceEnter, { y: [24, 0], opacity: [1, 1], duration: 900, ease: "out(4)" }, 220);
+  }
+
+  setTimeout(() => {
+    const hero = root.querySelector(".m-hero");
+    hero?.classList.add("is-loaded");
+    hero?.classList.add("is-hero-animated");
+  }, 500);
 
   const heroBg = root.querySelector<HTMLElement>(".m-hero__bg [data-parallax]");
   if (heroBg) {
