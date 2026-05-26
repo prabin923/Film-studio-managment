@@ -1391,64 +1391,169 @@ a.btn--secondary {
 }
 
 .auth-aside {
-  background: linear-gradient(165deg, #0f172a 0%, #1e3a8a 55%, #1e40af 100%);
+  background: linear-gradient(165deg, #09090b 0%, #0f172a 45%, #1e293b 100%);
   color: var(--auth-aside-fg);
   padding: clamp(32px, 6vw, 64px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 48px;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.dark .auth-aside {
+  background: linear-gradient(165deg, #020205 0%, #09090b 50%, #0f172a 100%);
+}
+
+.auth-character-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: auto;
+  margin-bottom: auto;
+  z-index: 2;
+  position: relative;
+}
+
+.auth-char-svg {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 16px 36px rgba(0, 0, 0, 0.3));
+}
+
+/* Elegant Floating Glow Orbs for Modern Parallax Effects */
+.auth-aside__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.32;
+  will-change: transform;
+}
+
+.auth-aside__glow--1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.45) 0%, rgba(99, 102, 241, 0) 70%);
+  top: -10%;
+  left: -20%;
+}
+
+.auth-aside__glow--2 {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(236, 72, 153, 0.32) 0%, rgba(236, 72, 153, 0) 70%);
+  bottom: -15%;
+  right: -10%;
+}
+
+.auth-aside__glow--3 {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(56, 189, 248, 0) 70%);
+  top: 35%;
+  left: 20%;
 }
 
 .auth-aside h1 {
-  color: var(--auth-aside-fg);
-  font-size: clamp(1.6rem, 3vw, 2rem);
-  font-weight: 600;
-  max-width: 16ch;
-  line-height: 1.2;
-  letter-spacing: -0.03em;
+  color: #ffffff;
+  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+  font-weight: 700;
+  max-width: 15ch;
+  line-height: 1.18;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  z-index: 2;
+  position: relative;
 }
 
 .auth-kicker {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--auth-aside-muted);
-  margin-bottom: 16px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  background: rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(37, 99, 235, 0.2);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  margin-bottom: 20px;
+  z-index: 2;
+  position: relative;
+}
+
+.dark .auth-kicker {
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.1);
+  border-color: rgba(96, 165, 250, 0.15);
 }
 
 .auth-lead {
-  margin-top: 12px;
-  color: var(--auth-aside-muted);
-  font-size: 0.95rem;
-  max-width: 40ch;
-  line-height: 1.55;
+  margin-top: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.98rem;
+  max-width: 38ch;
+  line-height: 1.6;
+  z-index: 2;
+  position: relative;
 }
 
 .auth-points {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 2;
+  position: relative;
 }
 
 .auth-points li {
   font-size: 0.88rem;
-  color: var(--auth-aside-soft);
-  padding-left: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 16px 20px 16px 48px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-lg);
   position: relative;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .auth-points li::before {
-  content: "";
+  content: "✦";
   position: absolute;
-  left: 0;
-  top: 0.55em;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--auth-aside-dot);
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--accent);
+  font-size: 1.15rem;
+  background: transparent;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+}
+
+.dark .auth-points li::before {
+  color: #60a5fa;
+}
+
+.auth-points li:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
 }
 
 .auth-main {
@@ -1462,14 +1567,34 @@ a.btn--secondary {
   background: var(--bg);
 }
 
+/* Glassmorphism for the interactive Sign-In Card */
+:root {
+  --auth-card-bg: rgba(255, 255, 255, 0.72);
+  --auth-card-border: rgba(231, 229, 228, 0.6);
+}
+
+.dark {
+  --auth-card-bg: rgba(28, 25, 23, 0.62);
+  --auth-card-border: rgba(68, 64, 60, 0.45);
+}
+
 .auth-card {
   width: 100%;
   max-width: 420px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--auth-card-bg);
+  border: 1px solid var(--auth-card-border);
   border-radius: var(--radius-xl);
-  padding: 32px;
+  padding: 36px;
   box-shadow: var(--shadow-md);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  transition: border-color var(--transition), box-shadow var(--transition);
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.auth-card:hover {
+  border-color: var(--accent);
 }
 
 .register-role-picker {
@@ -1478,24 +1603,37 @@ a.btn--secondary {
   gap: 4px;
   background: var(--surface-muted);
   border-radius: var(--radius);
-  padding: 3px;
+  padding: 4px;
+  border: 1px solid var(--border);
 }
 
 .register-role-picker button {
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 8px;
   font-size: 0.84rem;
   font-weight: 500;
   color: var(--text-secondary);
+  transition: all 0.25s var(--transition);
+  cursor: pointer;
+}
+
+.register-role-picker button:hover {
+  color: var(--text);
 }
 
 .register-role-picker button.active {
   background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
 }
+
+.dark .register-role-picker button.active {
+  color: var(--accent);
+}
+
 
 .sidebar-role {
   display: flex;
@@ -1570,31 +1708,39 @@ a.btn--secondary {
   gap: 4px;
   width: 100%;
   max-width: 400px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   background: var(--surface-muted);
   border-radius: var(--radius);
-  padding: 3px;
+  padding: 4px;
+  border: 1px solid var(--border);
 }
 
 .auth-tabs button {
   border: none;
   background: transparent;
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 8px;
   font-size: 0.88rem;
   font-weight: 500;
   color: var(--text-secondary);
+  transition: all 0.25s var(--transition);
+  cursor: pointer;
+}
+
+.auth-tabs button:hover {
+  color: var(--text);
 }
 
 .auth-tabs button.active {
   background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: var(--shadow-xs);
 }
 
 .auth-form {
   display: grid;
-  gap: 16px;
+  gap: 20px;
   width: 100%;
 }
 
@@ -1603,9 +1749,10 @@ a.btn--secondary {
 }
 
 .auth-form__intro h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
 }
 
 .auth-form__intro p {
@@ -1616,21 +1763,36 @@ a.btn--secondary {
 
 .auth-form__fields {
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .auth-form__fields .field {
   gap: 6px;
 }
 
+.auth-form__fields input {
+  transition: border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+.dark .auth-form__fields input {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.auth-form__fields input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--focus-ring), 0 4px 12px rgba(0, 0, 0, 0.03);
+  background-color: var(--surface);
+}
+
 .auth-form__legend {
-  margin: 8px 0 0;
-  padding-top: 12px;
+  margin: 12px 0 0;
+  padding-top: 14px;
   border-top: 1px solid var(--border);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
   color: var(--text-tertiary);
 }
 
@@ -1641,14 +1803,33 @@ a.btn--secondary {
 }
 
 .auth-hint {
-  margin: -4px 0 0;
+  margin: -6px 0 0;
   font-size: 0.82rem;
   color: var(--text-secondary);
+  padding: 4px 8px;
+  background: var(--surface-muted);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  display: inline-block;
+  align-self: flex-start;
 }
 
 .auth-form__submit {
   width: 100%;
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 12px;
+  font-weight: 600;
+  border-radius: var(--radius);
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.auth-form__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.auth-form__submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .auth-form__error + .auth-form__submit {
@@ -1663,7 +1844,7 @@ a.btn--secondary {
 .auth-form__switch {
   margin: 0;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   color: var(--text-secondary);
 }
 
@@ -1672,22 +1853,42 @@ a.btn--secondary {
   background: none;
   padding: 0;
   font: inherit;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
   cursor: pointer;
+  position: relative;
+  transition: color 0.3s var(--transition);
+}
+
+.auth-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.7);
+  transform-origin: bottom right;
+  transition: transform 0.3s var(--transition);
 }
 
 .auth-link:hover {
   color: var(--accent);
 }
 
+.auth-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
 .auth-form__error {
   margin: 0;
-  padding: 10px 12px;
+  padding: 12px;
   border-radius: var(--radius);
   background: var(--negative-bg);
+
   color: var(--negative);
   border: 1px solid var(--negative-border);
   font-size: 0.84rem;

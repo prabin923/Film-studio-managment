@@ -9,6 +9,7 @@ const nextConfig = {
       },
     ],
   },
+  transpilePackages: ["gsap"],
   async redirects() {
     return [
       { source: "/register", destination: "/login?mode=register", permanent: false },

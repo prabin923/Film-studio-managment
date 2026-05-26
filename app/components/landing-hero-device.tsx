@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
 import { AdminRevenueChart } from "./admin-dashboard";
 import { ProjectCard } from "./project-card";
 import { money } from "../lib/format";
@@ -60,70 +59,114 @@ function HeroDashboardMini() {
 
 export function LandingHeroDevice() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const deviceRef = useRef<HTMLDivElement>(null);
+  const laptopRef = useRef<HTMLDivElement>(null);
+  const screenInnerRef = useRef<HTMLDivElement>(null);
   const tiltRef = useRef({ x: 0, y: 0 });
+  const scrollRef = useRef({ lift: 0, scale: 1, zoom: 1, progress: 0 });
 
   useEffect(() => {
-    const device = deviceRef.current;
-    if (!device || prefersReducedMotion()) return;
+    const wrap = wrapRef.current;
+    const laptop = laptopRef.current;
+    const screenInner = screenInnerRef.current;
+    const hero = wrap?.closest(".m-hero");
+    if (!wrap || !laptop || !screenInner || !hero) return;
 
-    const onMove = (e: MouseEvent) => {
-      const rect = device.getBoundingClientRect();
+    const reduced = prefersReducedMotion();
+    if (reduced) return;
+
+    let scrollFrame = 0;
+
+    const applyTransforms = () => {
+      const { x: tiltX, y: tiltY } = tiltRef.current;
+      const { lift, scale, zoom } = scrollRef.current;
+
+      laptop.style.transform = [
+        `perspective(1100px)`,
+        `rotateX(${tiltX}deg)`,
+        `rotateY(${tiltY}deg)`,
+        `translate3d(0, ${lift}px, 0)`,
+        `scale(${scale})`,
+      ].join(" ");
+
+      screenInner.style.transform = `scale(${zoom}) translate3d(0, ${scrollRef.current.progress * -4}px, 0)`;
+    };
+
+    const updateScroll = () => {
+      const rect = hero.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const progress = Math.max(0, Math.min(1, 1 - rect.bottom / (vh * 1.1)));
+
+      scrollRef.current = {
+        progress,
+        zoom: 1 + progress * 0.1,
+        lift: progress * -20,
+        scale: 1 - progress * 0.03,
+      };
+      applyTransforms();
+    };
+
+    const onScroll = () => {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(() => {
+        scrollFrame = 0;
+        updateScroll();
+      });
+    };
+
+    const onPointerMove = (e: PointerEvent) => {
+      const rect = laptop.getBoundingClientRect();
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
       const dx = (e.clientX - cx) / (rect.width / 2);
       const dy = (e.clientY - cy) / (rect.height / 2);
+
       tiltRef.current = {
-        x: Math.max(-5, Math.min(5, -dy * 4)),
-        y: Math.max(-6, Math.min(6, dx * 5)),
+        x: Math.max(-10, Math.min(10, -dy * 8)),
+        y: Math.max(-12, Math.min(12, dx * 10)),
       };
-      gsap.to(device, {
-        rotateX: tiltRef.current.x,
-        rotateY: tiltRef.current.y,
-        duration: 0.35,
-        ease: "power2.out",
-        transformPerspective: 900,
-      });
+      applyTransforms();
     };
 
-    const onLeave = () => {
+    const onPointerLeave = () => {
       tiltRef.current = { x: 0, y: 0 };
-      gsap.to(device, {
-        rotateX: 0,
-        rotateY: 0,
-        duration: 0.5,
-        ease: "power2.out",
-      });
+      applyTransforms();
     };
 
-    device.addEventListener("mousemove", onMove);
-    device.addEventListener("mouseleave", onLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    wrap.addEventListener("pointermove", onPointerMove);
+    wrap.addEventListener("pointerleave", onPointerLeave);
+    updateScroll();
 
     return () => {
-      device.removeEventListener("mousemove", onMove);
-      device.removeEventListener("mouseleave", onLeave);
-      gsap.set(device, { clearProps: "transform" });
+      window.removeEventListener("scroll", onScroll);
+      wrap.removeEventListener("pointermove", onPointerMove);
+      wrap.removeEventListener("pointerleave", onPointerLeave);
+      if (scrollFrame) cancelAnimationFrame(scrollFrame);
+      laptop.style.transform = "";
+      screenInner.style.transform = "";
     };
   }, []);
 
   return (
-    <div className="m-hero__device-wrap m-hero__device-enter" ref={wrapRef}>
-      <div className="m-hero__device-glow" aria-hidden />
-      <div className="m-hero__device-perspective">
-        <div className="m-hero__device" ref={deviceRef}>
-          <div className="m-hero__laptop">
-            <div className="m-hero__laptop-camera" aria-hidden />
-            <div className="m-hero__screen-bezel">
-              <div className="m-hero__screen">
-                <div className="m-hero__screen-inner">
-                  <HeroDashboardMini />
+    <div className="m-hero__device-wrap" ref={wrapRef}>
+      <div className="m-hero__device-enter">
+        <div className="m-hero__device-glow" aria-hidden />
+        <div className="m-hero__device-perspective">
+          <div className="m-hero__device">
+            <div className="m-hero__laptop" ref={laptopRef}>
+              <div className="m-hero__laptop-camera" aria-hidden />
+              <div className="m-hero__screen-bezel">
+                <div className="m-hero__screen">
+                  <div className="m-hero__screen-inner" ref={screenInnerRef}>
+                    <HeroDashboardMini />
+                  </div>
+                  <div className="m-hero__screen-shine" aria-hidden />
                 </div>
-                <div className="m-hero__screen-shine" aria-hidden />
               </div>
-            </div>
-            <div className="m-hero__laptop-hinge" aria-hidden />
-            <div className="m-hero__laptop-base">
-              <div className="m-hero__laptop-trackpad" aria-hidden />
+              <div className="m-hero__laptop-hinge" aria-hidden />
+              <div className="m-hero__laptop-base">
+                <div className="m-hero__laptop-trackpad" aria-hidden />
+              </div>
             </div>
           </div>
         </div>

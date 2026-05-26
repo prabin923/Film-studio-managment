@@ -33,17 +33,30 @@
   left: 0;
   right: 0;
   z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   padding: 16px clamp(20px, 4vw, 48px);
-  border-bottom: 1px solid transparent;
-  background: transparent;
-  backdrop-filter: none;
-  transition: background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
+  border-bottom: 1px solid transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .landing--mercury .landing-nav.is-scrolled {
-  background: rgba(13, 13, 18, 0.82);
-  border-bottom-color: var(--m-border);
-  backdrop-filter: blur(16px) saturate(1.2);
+  background-color: #0d0d12 !important;
+  background-image: none !important;
+  border-bottom-color: var(--m-border) !important;
+  backdrop-filter: blur(12px) saturate(1.15) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.15) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 40px rgba(0, 0, 0, 0.45) !important;
 }
 
 .landing--mercury .landing-brand strong,
@@ -170,11 +183,12 @@
   margin: 0 auto;
   position: relative;
   opacity: 1;
+  cursor: default;
+  touch-action: pan-y;
 }
 
 .landing--mercury .m-hero__device-enter {
   opacity: 1;
-  transform: none;
 }
 
 .m-hero__device-glow {
@@ -190,27 +204,36 @@
     transparent 70%
   );
   pointer-events: none;
-  opacity: 0;
+  opacity: 1;
   z-index: 0;
 }
 
+.m-hero:not(.is-loaded) .m-hero__device-glow {
+  opacity: 0;
+  transition: opacity 1s ease 0.35s;
+}
+
+.m-hero.is-loaded .m-hero__device-glow {
+  opacity: 1;
+}
+
 .m-hero__device-perspective {
-  perspective: 1400px;
-  perspective-origin: 50% 40%;
   position: relative;
   z-index: 1;
 }
 
 .m-hero__device {
   transform-style: preserve-3d;
-  will-change: transform;
-  transition: transform 0.12s ease-out;
 }
 
 .m-hero__laptop {
   width: 100%;
   max-height: 100%;
   margin: 0 auto;
+  transform-style: preserve-3d;
+  transform-origin: 50% 80%;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -261,7 +284,7 @@
 .m-hero__screen-inner {
   position: absolute;
   inset: 0;
-  transform-origin: center center;
+  transform-origin: 50% 50%;
   will-change: transform;
   overflow: hidden;
 }
@@ -2159,25 +2182,12 @@
   color: var(--m-text);
 }
 
-/* Reveal — visible by default; JS adds is-visible for motion */
-.landing--mercury .m-reveal {
+/* Scroll reveals — GSAP animates; CSS fallback keeps content readable */
+.landing--mercury .m-reveal:not(.is-visible) {
   opacity: 1;
-  transform: translateY(20px);
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
 }
 
-.landing--mercury .m-reveal.is-visible {
-  transform: translateY(0);
-}
-
-/* Copy stays visible; JS animation enhances when available */
 .landing--mercury .m-hero__copy-zone .m-hero__anim {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.landing--mercury:not(.is-hero-animated) .m-hero__copy-zone .m-hero__anim {
   opacity: 1;
 }
 
@@ -2193,7 +2203,7 @@
     animation: none;
   }
 
-  .m-hero__device,
+  .m-hero__laptop,
   .m-hero__screen-inner {
     transform: none !important;
   }

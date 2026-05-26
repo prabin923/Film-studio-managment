@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { initAuthLoadingPulse } from "../lib/anime-motion";
+import { initAuthLoadingPulse } from "../lib/gsap-auth";
 
 export function AuthLoadingMark({ children = "WS" }: { children?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -18,3 +18,4 @@ export function AuthLoadingMark({ children = "WS" }: { children?: string }) {
     </span>
   );
 }
+
