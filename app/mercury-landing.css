@@ -59,7 +59,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 16px clamp(20px, 4vw, 48px);
+  padding: 12px clamp(16px, 3vw, 36px);
   border-bottom: 1px solid transparent !important;
   background-color: transparent !important;
   background-image: none !important;
@@ -79,6 +79,35 @@
   backdrop-filter: blur(12px) saturate(1.15) !important;
   -webkit-backdrop-filter: blur(12px) saturate(1.15) !important;
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+.landing--mercury .landing-brand__mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+}
+
+.landing--mercury .landing-brand strong {
+  font-size: 0.92rem;
+}
+
+.landing--mercury .landing-brand small {
+  font-size: 0.7rem;
+}
+
+.landing--mercury .landing-nav__links {
+  gap: 10px 14px;
+  font-size: 0.86rem;
+}
+
+.landing--mercury .landing-nav__links a:not(.btn) {
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.landing--mercury .landing-nav__links a:not(.btn):hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .landing--mercury .landing-brand strong,
@@ -2220,6 +2249,201 @@
 
 .landing--mercury .m-hero__copy-zone .m-hero__anim {
   opacity: 1;
+}
+
+/* Device-focused responsive pass */
+@media (max-width: 1100px) {
+  .landing--mercury .landing-nav {
+    gap: 12px;
+    padding: 10px 14px;
+  }
+
+  .landing--mercury .landing-nav__links {
+    gap: 8px 12px;
+    font-size: 0.84rem;
+  }
+
+  .m-products__visual {
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 900px) {
+  .landing--mercury .landing-nav {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .landing--mercury .landing-brand {
+    width: auto;
+    min-width: 220px;
+  }
+
+  .landing--mercury .landing-nav__links {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 6px 10px;
+    padding-bottom: 0;
+    scrollbar-width: none;
+  }
+
+  .landing--mercury .landing-nav__links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .landing--mercury .landing-nav__links a {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  .m-hero {
+    padding-top: 104px;
+  }
+
+  .m-showcase-v2__stage {
+    min-height: 380px;
+  }
+
+  .m-showcase-v2__previews,
+  .m-showcase-preview__body {
+    max-height: 340px;
+  }
+
+  .m-products__visual,
+  .m-dashboard-preview {
+    min-height: 340px;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing--mercury .landing-nav {
+    padding: 10px 12px;
+  }
+
+  .landing--mercury .landing-brand strong {
+    font-size: 0.9rem;
+  }
+
+  .landing--mercury .landing-brand small {
+    font-size: 0.68rem;
+  }
+
+  .landing--mercury .landing-nav__cta,
+  .landing--mercury .btn--primary {
+    padding: 8px 12px !important;
+  }
+
+  .m-hero {
+    padding: 92px 14px 24px;
+  }
+
+  .m-hero__cta-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-radius: 14px;
+    max-width: 100%;
+  }
+
+  .m-hero__cta-btn {
+    border-radius: 0 0 14px 14px;
+    width: 100%;
+  }
+
+  .m-hero__secondary-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .m-shimmer-btn {
+    width: 100%;
+  }
+
+  .m-shimmer-btn__label {
+    width: 100%;
+    text-align: center;
+  }
+
+  .m-section {
+    padding: 56px 16px;
+  }
+
+  .m-products__item {
+    padding: 16px;
+  }
+
+  .m-products__visual,
+  .m-dashboard-preview {
+    min-height: 300px;
+  }
+
+  .m-showcase-v2__copy h2 {
+    margin-bottom: 20px;
+  }
+
+  .m-showcase-v2__step {
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .m-showcase-v2__step-desc {
+    font-size: 0.84rem;
+  }
+
+  .m-showcase-v2__stage {
+    min-height: 340px;
+  }
+
+  .m-showcase-v2__previews,
+  .m-showcase-preview__body {
+    min-height: 300px;
+    max-height: 300px;
+  }
+
+  .m-workflow-card__body {
+    padding: 16px;
+  }
+
+  .m-how {
+    padding: 56px 16px;
+  }
+
+  .m-how__item {
+    gap: 12px;
+    padding-bottom: 20px;
+  }
+
+  .m-how__marker {
+    width: 38px;
+  }
+
+  .m-how__icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .m-stats-bento {
+    padding: 0 16px 8px;
+  }
+
+  .m-stat-card__inner {
+    padding: 18px 16px;
+  }
+
+  .m-trust__item {
+    padding: 18px;
+  }
+
+  .m-cta-final {
+    padding: 64px 16px 72px;
+  }
+
+  .landing--mercury .landing-footer {
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
