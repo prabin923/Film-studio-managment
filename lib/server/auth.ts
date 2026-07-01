@@ -1,9 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import { newId } from "@/app/lib/format";
-import { seed } from "@/app/lib/seed";
 import type { Account, RegisterAs, Store } from "@/app/lib/types";
 import { hashPassword, verifyPassword } from "./password";
-import { accountFromWorkspaceRow, loadStore, saveStore } from "./store";
+import { accountFromWorkspaceRow, loadStore } from "./store";
 
 export type AuthResult =
   | { ok: true; account: Account; store: Store }
@@ -91,6 +90,10 @@ export async function loginWithPassword(email: string, password: string): Promis
 
   if (!row) {
     return { ok: false, error: "No account found for this email. Sign up first." };
+  }
+
+  if (!row.passwordHash) {
+    return { ok: false, error: "This account signs in with Google. Use \"Continue with Google\" below." };
   }
 
   if (!verifyPassword(password, row.passwordHash)) {
@@ -181,14 +184,72 @@ export async function registerAccount(input: {
     },
   });
 
-  await saveStore(workspaceId, seed);
-
   const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId } });
   const account = accountFromWorkspaceRow(workspace, {
     name: input.name,
     email,
     role: "owner",
   });
+  const store = await loadStore(workspaceId);
+
+  return { ok: true, account, store };
+}
+
+export async function loginOrRegisterWithGoogle(profile: {
+  googleId: string;
+  email: string;
+  name: string;
+}): Promise<AuthResult> {
+  const email = profile.email.trim().toLowerCase();
+
+  const byGoogleId = await prisma.account.findUnique({
+    where: { googleId: profile.googleId },
+    include: { workspace: true },
+  });
+
+  if (byGoogleId) {
+    const account = accountFromWorkspaceRow(byGoogleId.workspace, {
+      name: byGoogleId.name,
+      email: byGoogleId.email,
+      role: byGoogleId.role as Account["role"],
+    });
+    const store = await loadStore(byGoogleId.workspaceId);
+    return { ok: true, account, store };
+  }
+
+  const byEmail = await prisma.account.findUnique({ where: { email } });
+  if (byEmail) {
+    return {
+      ok: false,
+      error: "An account already exists for this email. Log in with your password instead.",
+    };
+  }
+
+  const workspaceId = newId("workspace");
+  const accountId = newId("account");
+  const name = profile.name.trim() || email;
+
+  await prisma.workspace.create({
+    data: {
+      id: workspaceId,
+      studioName: "Your Wedding Film Studio",
+      ownerEmail: email,
+    },
+  });
+
+  await prisma.account.create({
+    data: {
+      id: accountId,
+      workspaceId,
+      email,
+      googleId: profile.googleId,
+      name,
+      role: "owner",
+    },
+  });
+
+  const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: workspaceId } });
+  const account = accountFromWorkspaceRow(workspace, { name, email, role: "owner" });
   const store = await loadStore(workspaceId);
 
   return { ok: true, account, store };

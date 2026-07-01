@@ -106,6 +106,14 @@ export function AuthScreen({
         </div>
 
         <div className="auth-card" ref={cardRef}>
+          <a href="/api/auth/google" className="btn btn--secondary auth-google-btn">
+            <GoogleIcon />
+            Continue with Google
+          </a>
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+
           {isRegister ? (
             <form
               className="auth-form"
@@ -172,6 +180,11 @@ export function AuthScreen({
                     disabled={pending}
                   />
                 </Field>
+                <p className="auth-form__forgot">
+                  <Link href="/forgot-password" className="auth-link">
+                    Forgot password?
+                  </Link>
+                </p>
               </div>
 
               {error ? (
@@ -195,6 +208,29 @@ export function AuthScreen({
         </div>
       </section>
     </main>
+  );
+}
+
+function GoogleIcon() {
+  return (
+    <svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true">
+      <path
+        fill="#FFC107"
+        d="M43.6 20.5H42V20.4H24v7.2h11.3c-1.6 4.6-6 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.4-5.4C34.5 6 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5z"
+      />
+      <path
+        fill="#FF3D00"
+        d="M6.3 14.6l6 4.4C14 15.1 18.7 12.4 24 12.4c3.1 0 5.9 1.2 8 3.1l5.4-5.4C34.5 6 29.5 4 24 4 16.3 4 9.7 8.3 6.3 14.6z"
+      />
+      <path
+        fill="#4CAF50"
+        d="M24 44c5.4 0 10.3-1.9 14.1-5.1l-6.5-5.4C29.6 35.4 27 36 24 36c-5.3 0-9.7-3.4-11.3-8l-6.3 4.9C9.6 39.7 16.3 44 24 44z"
+      />
+      <path
+        fill="#1976D2"
+        d="M43.6 20.5H42V20.4H24v7.2h11.3c-.8 2.2-2.1 4.1-3.9 5.5l6.5 5.4C41.5 35.3 44 30 44 24c0-1.2-.1-2.4-.4-3.5z"
+      />
+    </svg>
   );
 }
 

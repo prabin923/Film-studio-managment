@@ -20,6 +20,11 @@ export default function LoginPage() {
   useEffect(() => {
     setAuthMode(readAuthModeFromUrl());
 
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "google") {
+      setAuthError(params.get("reason") || "Google sign-in failed. Try again or use your email and password.");
+    }
+
     let cancelled = false;
 
     apiMe()

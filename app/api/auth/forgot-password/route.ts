@@ -1,0 +1,32 @@
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+import { requestPasswordReset } from "@/lib/server/password-reset";
+import { sendPasswordResetEmail } from "@/lib/server/email";
+import { databaseErrorMessage } from "@/lib/server/db-error";
+import { getAppUrl } from "@/lib/server/app-url";
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const email = String(body.email || "").trim().toLowerCase();
+
+    if (!email) {
+      return NextResponse.json({ error: "Enter your email." }, { status: 400 });
+    }
+
+    const token = await requestPasswordReset(email);
+    if (token) {
+      const resetUrl = `${getAppUrl()}/reset-password?token=${token}`;
+      await sendPasswordResetEmail(email, resetUrl);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "If an account exists for that email, we've sent a password reset link.",
+    });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: databaseErrorMessage(error) }, { status: 500 });
+  }
+}

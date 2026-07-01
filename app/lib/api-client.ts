@@ -69,6 +69,28 @@ export async function apiRegister(payload: {
   );
 }
 
+export async function apiForgotPassword(email: string) {
+  return parseJson<{ ok: boolean; message: string }>(
+    await apiFetch("/api/auth/forgot-password", {
+      ...fetchOpts,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    }),
+  );
+}
+
+export async function apiResetPassword(token: string, password: string) {
+  return parseJson<{ ok: boolean }>(
+    await apiFetch("/api/auth/reset-password", {
+      ...fetchOpts,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, password }),
+    }),
+  );
+}
+
 export async function apiLogout() {
   await apiFetch("/api/auth/logout", { ...fetchOpts, method: "POST" });
 }

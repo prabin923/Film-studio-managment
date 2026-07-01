@@ -17,13 +17,10 @@ npm install
 cp .env.example .env
 # Set DATABASE_URL in .env (see Database below)
 npm run db:migrate
-npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
-
-**Demo sign-in** (after seed): `owner@infinitycreations.com` / `demo12345`
+Open [http://localhost:3000](http://localhost:3000) and register a new studio account — new signups start with an empty workspace (no demo/sample data).
 
 ## Environment variables
 
@@ -45,11 +42,10 @@ PRISMA_API_KEY="<your-api-key>" npx prisma postgres link --database "<DATABASE_I
 
 Or paste any Postgres URL into `.env` as `DATABASE_URL`.
 
-2. Apply migrations, seed demo data, and verify:
+2. Apply migrations and verify:
 
 ```bash
 npm run db:migrate
-npm run db:seed
 npm run db:verify
 ```
 
@@ -72,7 +68,6 @@ Schema reference: [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
 | `npm run db:migrate` | Run Prisma migrations |
-| `npm run db:seed` | Seed demo workspace |
 | `npm run db:studio` | Prisma Studio |
 | `npm run db:verify` | Check DB connectivity |
 
