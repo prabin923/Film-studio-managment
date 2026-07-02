@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">WedStudio OS</string>
+    <string name="title_activity_main">WedStudio OS</string>
+    <string name="package_name">com.infinitycreations.wedstudio</string>
+    <string name="custom_url_scheme">com.infinitycreations.wedstudio</string>
+</resources>
