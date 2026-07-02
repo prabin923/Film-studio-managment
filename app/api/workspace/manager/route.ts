@@ -73,10 +73,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const inviteToken = await requestPasswordReset(email, INVITE_TTL_MS);
-    if (inviteToken) {
-      const setupUrl = `${getAppUrl()}/reset-password?token=${inviteToken}`;
-      await sendManagerInviteEmail(email, setupUrl, result.manager.studioName);
+    // The manager account is already persisted. Sending the invite email is a
+    // best-effort side-effect: if it fails (Resend outage, unverified domain,
+    // bad RESEND_FROM_EMAIL, etc.) we must NOT fail the request, otherwise the
+    // owner sees an error while the account exists and every retry hits the
+    // "email already registered" check.
+    try {
+      const inviteToken = await requestPasswordReset(email, INVITE_TTL_MS);
+      if (inviteToken) {
+        const setupUrl = `${getAppUrl()}/reset-password?token=${inviteToken}`;
+        await sendManagerInviteEmail(email, setupUrl, result.manager.studioName);
+      }
+    } catch (emailError) {
+      console.error("Manager created but invite email failed to send:", emailError);
     }
 
     return NextResponse.json({ manager: result.manager });
