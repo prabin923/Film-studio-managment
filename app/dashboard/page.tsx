@@ -602,7 +602,7 @@ export default function DashboardPage() {
   const signOut = async () => {
     await apiLogout();
     setAccount(null);
-    router.push("/");
+    router.replace("/login");
   };
 
   const activeNav = filterNavForRole(role);
