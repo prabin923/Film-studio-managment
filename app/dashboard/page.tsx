@@ -459,14 +459,16 @@ export default function DashboardPage() {
     setManagerInvitePending(true);
     setManagerInviteError("");
 
+    const form = event.currentTarget;
+
     try {
-      const data = new FormData(event.currentTarget);
+      const data = new FormData(form);
       const result = await apiCreateManager({
         name: String(data.get("name") || ""),
         email: String(data.get("email") || ""),
       });
       setWorkspaceTeam((current) => ({ ...current, managers: [...current.managers, result.manager] }));
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setManagerInviteError(error instanceof Error ? error.message : "Failed to add manager.");
     } finally {
