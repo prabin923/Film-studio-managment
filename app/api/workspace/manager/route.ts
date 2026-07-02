@@ -64,19 +64,32 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const email = String(body.email || "");
+    const password = body.password ? String(body.password) : undefined;
     const result = await createManagerByOwner(session.workspaceId, {
       name: String(body.name || ""),
       email,
+      password,
     });
 
     if (!result.ok) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const inviteToken = await requestPasswordReset(email, INVITE_TTL_MS);
-    if (inviteToken) {
-      const setupUrl = `${getAppUrl()}/reset-password?token=${inviteToken}`;
-      await sendManagerInviteEmail(email, setupUrl, result.manager.studioName);
+    // If the owner set a password, the manager can sign in immediately — no
+    // email needed. Only when no password was provided do we fall back to
+    // emailing a setup link. That email is best-effort: the account is already
+    // persisted, so a send failure (Resend outage, unverified domain, etc.)
+    // must NOT fail the request.
+    if (!password) {
+      try {
+        const inviteToken = await requestPasswordReset(email, INVITE_TTL_MS);
+        if (inviteToken) {
+          const setupUrl = `${getAppUrl()}/reset-password?token=${inviteToken}`;
+          await sendManagerInviteEmail(email, setupUrl, result.manager.studioName);
+        }
+      } catch (emailError) {
+        console.error("Manager created but invite email failed to send:", emailError);
+      }
     }
 
     return NextResponse.json({ manager: result.manager });

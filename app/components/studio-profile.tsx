@@ -176,7 +176,8 @@ export function ManagerInviteForm({
     <form className="manager-invite" onSubmit={onSubmit}>
       <h4 className="manager-invite__title">Add manager</h4>
       <p className="manager-invite__desc">
-        Create a manager account for your studio. We&apos;ll email them a link to set their own password.
+        Create a manager account for your studio. Set a starting password and share it with them — they can change it
+        after they sign in.
       </p>
       {error ? (
         <p className="auth-form__error" role="alert">
@@ -197,9 +198,83 @@ export function ManagerInviteForm({
             disabled={pending}
           />
         </Field>
+        <Field label="Password" span={2}>
+          <input
+            name="password"
+            type="password"
+            placeholder="Min. 8 characters"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            disabled={pending}
+          />
+        </Field>
       </div>
       <button className="btn btn--primary" type="submit" disabled={pending}>
-        {pending ? "Sending invite…" : "Add manager"}
+        {pending ? "Adding…" : "Add manager"}
+      </button>
+    </form>
+  );
+}
+
+export function ChangePasswordForm({
+  onSubmit,
+  pending,
+  error,
+  success,
+  hasPassword = true,
+}: {
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  pending?: boolean;
+  error?: string;
+  success?: string;
+  hasPassword?: boolean;
+}) {
+  return (
+    <form className="manager-invite" onSubmit={onSubmit}>
+      <h4 className="manager-invite__title">{hasPassword ? "Change password" : "Set a password"}</h4>
+      <p className="manager-invite__desc">
+        {hasPassword
+          ? "Update the password you use to sign in."
+          : "Add a password so you can sign in without Google."}
+      </p>
+      {error ? (
+        <p className="auth-form__error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {success ? (
+        <p className="auth-hint" role="status">
+          {success}
+        </p>
+      ) : null}
+      <div className="manager-invite__fields">
+        {hasPassword ? (
+          <Field label="Current password" span={2}>
+            <input
+              name="currentPassword"
+              type="password"
+              placeholder="Current password"
+              required
+              autoComplete="current-password"
+              disabled={pending}
+            />
+          </Field>
+        ) : null}
+        <Field label="New password" span={2}>
+          <input
+            name="newPassword"
+            type="password"
+            placeholder="Min. 8 characters"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            disabled={pending}
+          />
+        </Field>
+      </div>
+      <button className="btn btn--primary" type="submit" disabled={pending}>
+        {pending ? "Saving…" : hasPassword ? "Change password" : "Set password"}
       </button>
     </form>
   );

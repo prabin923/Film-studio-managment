@@ -61,8 +61,9 @@ export default function LoginPage() {
     setAuthError("");
     setAuthPending(true);
 
+    const form = event.currentTarget;
     try {
-      const data = new FormData(event.currentTarget);
+      const data = new FormData(form);
       const email = String(data.get("email") || "").trim().toLowerCase();
       const password = String(data.get("password") || "");
 
@@ -77,7 +78,7 @@ export default function LoginPage() {
 
       await apiLogin(email, password);
       router.replace("/dashboard");
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Sign in failed.");
     } finally {
@@ -90,8 +91,9 @@ export default function LoginPage() {
     setAuthError("");
     setAuthPending(true);
 
+    const form = event.currentTarget;
     try {
-      const data = new FormData(event.currentTarget);
+      const data = new FormData(form);
       const email = String(data.get("email") || "").trim().toLowerCase();
       const password = String(data.get("password") || "");
 
@@ -120,7 +122,7 @@ export default function LoginPage() {
       });
 
       router.replace("/dashboard");
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setAuthError(error instanceof Error ? error.message : "Registration failed.");
     } finally {
