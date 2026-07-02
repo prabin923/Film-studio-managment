@@ -1694,6 +1694,45 @@ a.btn--secondary {
   color: var(--text);
 }
 
+.invite-link {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface-muted, var(--surface));
+}
+
+.invite-link__hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.invite-link__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.invite-link__input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.invite-link__copy {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+}
+
 .manager-invite {
   margin-top: 16px;
   padding-top: 16px;
