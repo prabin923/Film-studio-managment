@@ -60,16 +60,50 @@ async function createManagerForWorkspace(input: {
 
 export async function createManagerByOwner(
   ownerWorkspaceId: string,
-  input: { email: string; name: string },
+  input: { email: string; name: string; password?: string },
 ): Promise<ManagerInviteResult> {
   return createManagerForWorkspace({
     workspaceId: ownerWorkspaceId,
     email: input.email,
     name: input.name,
+    password: input.password,
   });
 }
 
 export type ManagerActionResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Change the signed-in account's password. When the account already has a
+ * password, the current one must be supplied and correct. Accounts with no
+ * password yet (e.g. Google sign-in) can set one without a current password.
+ */
+export async function changePassword(
+  email: string,
+  currentPassword: string | undefined,
+  newPassword: string,
+): Promise<ManagerActionResult> {
+  if (newPassword.length < 8) {
+    return { ok: false, error: "New password must be at least 8 characters." };
+  }
+
+  const account = await prisma.account.findUnique({ where: { email: email.trim().toLowerCase() } });
+  if (!account) {
+    return { ok: false, error: "Account not found." };
+  }
+
+  if (account.passwordHash) {
+    if (!currentPassword || !verifyPassword(currentPassword, account.passwordHash)) {
+      return { ok: false, error: "Current password is incorrect." };
+    }
+  }
+
+  await prisma.account.update({
+    where: { id: account.id },
+    data: { passwordHash: hashPassword(newPassword) },
+  });
+
+  return { ok: true };
+}
 
 async function findManagerInWorkspace(ownerWorkspaceId: string, managerEmail: string) {
   return prisma.account.findFirst({
