@@ -20,6 +20,7 @@ import {
 } from "../lib/dashboard-utils";
 import {
   apiCreateManager,
+  apiCreateManagerInvite,
   apiGetWorkspaceTeam,
   apiLogout,
   apiMe,
@@ -100,6 +101,8 @@ export default function DashboardPage() {
   });
   const [managerActionPending, setManagerActionPending] = useState("");
   const [managerActionError, setManagerActionError] = useState("");
+  const [inviteLinks, setInviteLinks] = useState<Record<string, string>>({});
+  const [invitePendingEmail, setInvitePendingEmail] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState("");
   const skipNextSave = useRef(true);
@@ -468,11 +471,28 @@ export default function DashboardPage() {
         email: String(data.get("email") || ""),
       });
       setWorkspaceTeam((current) => ({ ...current, managers: [...current.managers, result.manager] }));
+      if (result.inviteUrl) {
+        setInviteLinks((current) => ({ ...current, [result.manager.email]: result.inviteUrl as string }));
+      }
       form.reset();
     } catch (error) {
       setManagerInviteError(error instanceof Error ? error.message : "Failed to add manager.");
     } finally {
       setManagerInvitePending(false);
+    }
+  };
+
+  const handleGenerateInvite = async (email: string) => {
+    setInvitePendingEmail(email);
+    setManagerActionError("");
+
+    try {
+      const result = await apiCreateManagerInvite(email);
+      setInviteLinks((current) => ({ ...current, [email]: result.inviteUrl }));
+    } catch (error) {
+      setManagerActionError(error instanceof Error ? error.message : "Failed to create invite link.");
+    } finally {
+      setInvitePendingEmail("");
     }
   };
 
@@ -505,6 +525,11 @@ export default function DashboardPage() {
         ...current,
         managers: current.managers.filter((manager) => manager.email !== email),
       }));
+      setInviteLinks((current) => {
+        const next = { ...current };
+        delete next[email];
+        return next;
+      });
     } catch (error) {
       setManagerActionError(error instanceof Error ? error.message : "Failed to remove manager.");
     } finally {
@@ -716,6 +741,9 @@ export default function DashboardPage() {
             onRemoveManager={handleRemoveManager}
             managerActionPending={managerActionPending}
             managerActionError={managerActionError}
+            inviteLinks={inviteLinks}
+            onGenerateInvite={handleGenerateInvite}
+            invitePendingEmail={invitePendingEmail}
             onSaveBranding={handleSaveBranding}
             brandingPending={brandingPending}
             brandingError={brandingError}
@@ -732,11 +760,17 @@ function ManagerRow({
   onRename,
   onRemove,
   pending,
+  inviteLink,
+  onGenerateInvite,
+  invitePending,
 }: {
   manager: Account;
   onRename: (email: string, name: string) => void;
   onRemove: (email: string) => void;
   pending: boolean;
+  inviteLink?: string;
+  onGenerateInvite: (email: string) => void;
+  invitePending: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(manager.name);
@@ -751,53 +785,92 @@ function ManagerRow({
   };
 
   return (
-    <div className="team-access__row">
-      {editing ? (
-        <>
-          <input
-            className="team-access__rename-input"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            disabled={pending}
-            autoFocus
-          />
-          <div className="team-access__row-actions">
-            <button className="text-btn" type="button" onClick={save} disabled={pending}>
-              Save
-            </button>
-            <button
-              className="text-btn"
-              type="button"
-              onClick={() => {
-                setName(manager.name);
-                setEditing(false);
-              }}
+    <>
+      <div className="team-access__row">
+        {editing ? (
+          <>
+            <input
+              className="team-access__rename-input"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
               disabled={pending}
-            >
-              Cancel
-            </button>
-          </div>
-        </>
-      ) : (
-        <>
-          <strong>
-            {manager.name} · {manager.email}
-          </strong>
-          <div className="team-access__row-actions">
-            <button className="text-btn" type="button" onClick={() => setEditing(true)} disabled={pending}>
-              Edit
-            </button>
-            <button
-              className="text-btn text-btn--danger"
-              type="button"
-              onClick={() => onRemove(manager.email)}
-              disabled={pending}
-            >
-              Remove
-            </button>
-          </div>
-        </>
-      )}
+              autoFocus
+            />
+            <div className="team-access__row-actions">
+              <button className="text-btn" type="button" onClick={save} disabled={pending}>
+                Save
+              </button>
+              <button
+                className="text-btn"
+                type="button"
+                onClick={() => {
+                  setName(manager.name);
+                  setEditing(false);
+                }}
+                disabled={pending}
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <strong>
+              {manager.name} · {manager.email}
+            </strong>
+            <div className="team-access__row-actions">
+              <button
+                className="text-btn"
+                type="button"
+                onClick={() => onGenerateInvite(manager.email)}
+                disabled={pending || invitePending}
+              >
+                {invitePending ? "Generating…" : "Invite link"}
+              </button>
+              <button className="text-btn" type="button" onClick={() => setEditing(true)} disabled={pending}>
+                Edit
+              </button>
+              <button
+                className="text-btn text-btn--danger"
+                type="button"
+                onClick={() => onRemove(manager.email)}
+                disabled={pending}
+              >
+                Remove
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+      {inviteLink && !editing ? <InviteLinkBox url={inviteLink} /> : null}
+    </>
+  );
+}
+
+function InviteLinkBox({ url }: { url: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div className="invite-link">
+      <p className="invite-link__hint">
+        Send this link to the manager. They open it to set a password, then sign in with their email. Expires in 7 days.
+      </p>
+      <div className="invite-link__row">
+        <input className="invite-link__input" value={url} readOnly onFocus={(event) => event.target.select()} />
+        <button className="btn btn--primary invite-link__copy" type="button" onClick={copy}>
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -814,6 +887,9 @@ function ProfileSettings({
   onRemoveManager,
   managerActionPending,
   managerActionError,
+  inviteLinks,
+  onGenerateInvite,
+  invitePendingEmail,
   onSaveBranding,
   brandingPending,
   brandingError,
@@ -829,6 +905,9 @@ function ProfileSettings({
   onRemoveManager: (email: string) => void;
   managerActionPending: string;
   managerActionError: string;
+  inviteLinks: Record<string, string>;
+  onGenerateInvite: (email: string) => void;
+  invitePendingEmail: string;
   onSaveBranding: (branding: StudioBranding) => void;
   brandingPending: boolean;
   brandingError: string;
@@ -856,6 +935,9 @@ function ProfileSettings({
                     onRename={onRenameManager}
                     onRemove={onRemoveManager}
                     pending={managerActionPending === manager.email}
+                    inviteLink={inviteLinks[manager.email]}
+                    onGenerateInvite={onGenerateInvite}
+                    invitePending={invitePendingEmail === manager.email}
                   />
                 ) : (
                   <div className="team-access__row" key={manager.email}>

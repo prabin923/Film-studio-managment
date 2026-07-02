@@ -176,7 +176,8 @@ export function ManagerInviteForm({
     <form className="manager-invite" onSubmit={onSubmit}>
       <h4 className="manager-invite__title">Add manager</h4>
       <p className="manager-invite__desc">
-        Create a manager account for your studio. We&apos;ll email them a link to set their own password.
+        Create a manager account for your studio. We&apos;ll email them a link to set their own password — and you can
+        copy the invite link straight from their row above to share it yourself.
       </p>
       {error ? (
         <p className="auth-form__error" role="alert">

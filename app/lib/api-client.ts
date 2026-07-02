@@ -141,12 +141,23 @@ export async function apiGetWorkspaceTeam() {
 }
 
 export async function apiCreateManager(payload: { name: string; email: string }) {
-  return parseJson<{ manager: Account }>(
+  return parseJson<{ manager: Account; inviteUrl: string | null }>(
     await apiFetch("/api/workspace/manager", {
       ...fetchOpts,
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+    }),
+  );
+}
+
+export async function apiCreateManagerInvite(email: string) {
+  return parseJson<{ inviteUrl: string }>(
+    await apiFetch("/api/workspace/manager/invite", {
+      ...fetchOpts,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     }),
   );
 }

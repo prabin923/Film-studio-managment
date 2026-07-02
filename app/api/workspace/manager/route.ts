@@ -73,13 +73,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    const inviteToken = await requestPasswordReset(email, INVITE_TTL_MS);
-    if (inviteToken) {
-      const setupUrl = `${getAppUrl()}/reset-password?token=${inviteToken}`;
-      await sendManagerInviteEmail(email, setupUrl, result.manager.studioName);
+    // Best-effort: generate an invite link and email it. Neither a missing
+    // NEXT_PUBLIC_APP_URL nor a mail-provider failure should block adding the
+    // manager or leak out as a misleading "Database error" — the owner can
+    // still copy the returned inviteUrl from the dashboard.
+    let inviteUrl: string | null = null;
+    try {
+      const inviteToken = await requestPasswordReset(email, INVITE_TTL_MS);
+      if (inviteToken) {
+        inviteUrl = `${getAppUrl()}/reset-password?token=${inviteToken}`;
+        try {
+          await sendManagerInviteEmail(email, inviteUrl, result.manager.studioName);
+        } catch (emailError) {
+          console.error("Failed to send manager invite email", emailError);
+        }
+      }
+    } catch (inviteError) {
+      console.error("Failed to generate manager invite link", inviteError);
     }
 
-    return NextResponse.json({ manager: result.manager });
+    return NextResponse.json({ manager: result.manager, inviteUrl });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: databaseErrorMessage(error) }, { status: 500 });
