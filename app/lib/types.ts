@@ -66,6 +66,7 @@ export type Client = {
   assignedStaff: string;
   status: ProjectStatus;
   notes: string;
+  createdBy: string;
 };
 
 export type Expense = {
@@ -75,6 +76,7 @@ export type Expense = {
   vendor: string;
   amount: number;
   notes: string;
+  createdBy: string;
 };
 
 export type Staff = {
@@ -85,6 +87,7 @@ export type Staff = {
   advance: number;
   deduction: number;
   status: PayStatus;
+  createdBy: string;
 };
 
 export type InventoryItem = {
@@ -95,6 +98,7 @@ export type InventoryItem = {
   condition: string;
   dayRate: number;
   status: ItemStatus;
+  createdBy: string;
 };
 
 export type Rental = {
@@ -109,6 +113,7 @@ export type Rental = {
   paidAmount: number;
   status: RentalStatus;
   returnCondition: string;
+  createdBy: string;
 };
 
 export type Store = {

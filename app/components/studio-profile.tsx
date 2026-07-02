@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import type { Account } from "../lib/types";
 import { Field, FormPanel } from "./ui";
 import { StudioBrandMark } from "./studio-brand";
+import { GoogleIcon } from "./google-icon";
 import type { StudioBranding } from "../lib/types";
 
 export function StudioProfileCard({
@@ -175,7 +176,7 @@ export function ManagerInviteForm({
     <form className="manager-invite" onSubmit={onSubmit}>
       <h4 className="manager-invite__title">Add manager</h4>
       <p className="manager-invite__desc">
-        Create a manager account for your studio. They can log in with the email and password you set below.
+        Create a manager account for your studio. We&apos;ll email them a link to set their own password.
       </p>
       {error ? (
         <p className="auth-form__error" role="alert">
@@ -196,31 +197,47 @@ export function ManagerInviteForm({
             disabled={pending}
           />
         </Field>
-        <Field label="Password">
-          <input
-            name="password"
-            type="password"
-            placeholder="Min. 8 characters"
-            required
-            minLength={8}
-            autoComplete="new-password"
-            disabled={pending}
-          />
-        </Field>
       </div>
       <button className="btn btn--primary" type="submit" disabled={pending}>
-        {pending ? "Adding manager…" : "Add manager"}
+        {pending ? "Sending invite…" : "Add manager"}
       </button>
     </form>
   );
 }
 
 export function ManagerJoinFields() {
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const trimmedOwnerEmail = ownerEmail.trim().toLowerCase();
+
   return (
     <div className="auth-form__fields">
       <Field label="Owner email">
-        <input name="ownerEmail" type="email" placeholder="owner@studio.com" required autoComplete="email" />
+        <input
+          name="ownerEmail"
+          type="email"
+          placeholder="owner@studio.com"
+          required
+          autoComplete="email"
+          value={ownerEmail}
+          onChange={(event) => setOwnerEmail(event.target.value)}
+        />
       </Field>
+
+      {trimmedOwnerEmail ? (
+        <a
+          href={`/api/auth/google?join=${encodeURIComponent(trimmedOwnerEmail)}`}
+          className="btn btn--secondary auth-google-btn"
+        >
+          <GoogleIcon />
+          Continue with Google to join
+        </a>
+      ) : (
+        <p className="auth-hint">Enter the owner&apos;s email above to join with Google instead.</p>
+      )}
+
+      <div className="auth-divider">
+        <span>or set a password</span>
+      </div>
 
       <p className="auth-form__legend">Your account</p>
       <Field label="Full name">

@@ -15,7 +15,6 @@ import { ThemeToggle } from "../components/theme-toggle";
 import {
   confirmRemove,
   filterNavForRole,
-  isDemoResetEnabled,
   parseViewFromSearch,
   sortClientsByEventDate,
 } from "../lib/dashboard-utils";
@@ -24,6 +23,8 @@ import {
   apiGetWorkspaceTeam,
   apiLogout,
   apiMe,
+  apiRemoveManager,
+  apiRenameManager,
   apiSaveStore,
   apiUpdateProfile,
 } from "../lib/api-client";
@@ -93,10 +94,12 @@ export default function DashboardPage() {
   const [managerInviteError, setManagerInviteError] = useState("");
   const [brandingPending, setBrandingPending] = useState(false);
   const [brandingError, setBrandingError] = useState("");
-  const [workspaceTeam, setWorkspaceTeam] = useState<{ manager: Account | null; owner: Account | null }>({
-    manager: null,
+  const [workspaceTeam, setWorkspaceTeam] = useState<{ managers: Account[]; owner: Account | null }>({
+    managers: [],
     owner: null,
   });
+  const [managerActionPending, setManagerActionPending] = useState("");
+  const [managerActionError, setManagerActionError] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [saveError, setSaveError] = useState("");
   const skipNextSave = useRef(true);
@@ -167,8 +170,8 @@ export default function DashboardPage() {
     if (!loaded || !account || view !== "profile") return;
 
     apiGetWorkspaceTeam()
-      .then((data) => setWorkspaceTeam({ manager: data.manager, owner: data.owner }))
-      .catch(() => setWorkspaceTeam({ manager: null, owner: null }));
+      .then((data) => setWorkspaceTeam({ managers: data.managers, owner: data.owner }))
+      .catch(() => setWorkspaceTeam({ managers: [], owner: null }));
   }, [account, loaded, view]);
 
   useEffect(() => {
@@ -257,6 +260,7 @@ export default function DashboardPage() {
       assignedStaff: String(data.get("assignedStaff") || ""),
       status: String(data.get("status") || "Inquiry") as ProjectStatus,
       notes: String(data.get("notes") || ""),
+      createdBy: account?.name || account?.email || "",
     };
     setStore((current) => ({ ...current, clients: [client, ...current.clients] }));
     event.currentTarget.reset();
@@ -272,6 +276,7 @@ export default function DashboardPage() {
       vendor: String(data.get("vendor") || ""),
       amount: toPaisa(data.get("amount")),
       notes: String(data.get("notes") || ""),
+      createdBy: account?.name || account?.email || "",
     };
     setStore((current) => ({ ...current, expenses: [expense, ...current.expenses] }));
     event.currentTarget.reset();
@@ -288,6 +293,7 @@ export default function DashboardPage() {
       advance: toPaisa(data.get("advance")),
       deduction: toPaisa(data.get("deduction")),
       status: String(data.get("status") || "Pending") as PayStatus,
+      createdBy: account?.name || account?.email || "",
     };
     setStore((current) => ({ ...current, staff: [person, ...current.staff] }));
     event.currentTarget.reset();
@@ -304,6 +310,7 @@ export default function DashboardPage() {
       condition: String(data.get("condition") || "Good"),
       dayRate: toPaisa(data.get("dayRate")),
       status: String(data.get("status") || "Available") as ItemStatus,
+      createdBy: account?.name || account?.email || "",
     };
     setStore((current) => ({ ...current, inventory: [item, ...current.inventory] }));
     event.currentTarget.reset();
@@ -339,6 +346,7 @@ export default function DashboardPage() {
         paidAmount,
         status: "Reserved",
         returnCondition: "",
+        createdBy: account?.name || account?.email || "",
       };
     });
 
@@ -456,14 +464,49 @@ export default function DashboardPage() {
       const result = await apiCreateManager({
         name: String(data.get("name") || ""),
         email: String(data.get("email") || ""),
-        password: String(data.get("password") || ""),
       });
-      setWorkspaceTeam((current) => ({ ...current, manager: result.manager }));
+      setWorkspaceTeam((current) => ({ ...current, managers: [...current.managers, result.manager] }));
       event.currentTarget.reset();
     } catch (error) {
       setManagerInviteError(error instanceof Error ? error.message : "Failed to add manager.");
     } finally {
       setManagerInvitePending(false);
+    }
+  };
+
+  const handleRenameManager = async (email: string, name: string) => {
+    setManagerActionPending(email);
+    setManagerActionError("");
+
+    try {
+      await apiRenameManager(email, name);
+      setWorkspaceTeam((current) => ({
+        ...current,
+        managers: current.managers.map((manager) => (manager.email === email ? { ...manager, name } : manager)),
+      }));
+    } catch (error) {
+      setManagerActionError(error instanceof Error ? error.message : "Failed to rename manager.");
+    } finally {
+      setManagerActionPending("");
+    }
+  };
+
+  const handleRemoveManager = async (email: string) => {
+    if (!confirmRemove(email)) return;
+
+    setManagerActionPending(email);
+    setManagerActionError("");
+
+    try {
+      await apiRemoveManager(email);
+      setWorkspaceTeam((current) => ({
+        ...current,
+        managers: current.managers.filter((manager) => manager.email !== email),
+      }));
+    } catch (error) {
+      setManagerActionError(error instanceof Error ? error.message : "Failed to remove manager.");
+    } finally {
+      setManagerActionPending("");
     }
   };
 
@@ -600,19 +643,7 @@ export default function DashboardPage() {
           onRetry={saveState === "error" ? () => void persistStore(store) : undefined}
         />
 
-        {view !== "dashboard" ? (
-          <PageHeader
-            title={copy.title}
-            description={copy.description}
-            action={
-              isDemoResetEnabled() ? (
-                <button className="btn btn--secondary" type="button" onClick={() => setStore(seed)}>
-                  Reset demo
-                </button>
-              ) : undefined
-            }
-          />
-        ) : null}
+        {view !== "dashboard" ? <PageHeader title={copy.title} description={copy.description} /> : null}
 
         {view === "dashboard" && (
           <AdminDashboardHome
@@ -673,12 +704,16 @@ export default function DashboardPage() {
         {view === "profile" && (
           <ProfileSettings
             account={account}
-            manager={workspaceTeam.manager}
+            managers={workspaceTeam.managers}
             owner={workspaceTeam.owner}
             onSave={updateProfile}
             onInviteManager={handleInviteManager}
             managerInvitePending={managerInvitePending}
             managerInviteError={managerInviteError}
+            onRenameManager={handleRenameManager}
+            onRemoveManager={handleRemoveManager}
+            managerActionPending={managerActionPending}
+            managerActionError={managerActionError}
             onSaveBranding={handleSaveBranding}
             brandingPending={brandingPending}
             brandingError={brandingError}
@@ -690,25 +725,108 @@ export default function DashboardPage() {
   );
 }
 
+function ManagerRow({
+  manager,
+  onRename,
+  onRemove,
+  pending,
+}: {
+  manager: Account;
+  onRename: (email: string, name: string) => void;
+  onRemove: (email: string) => void;
+  pending: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName] = useState(manager.name);
+
+  const save = () => {
+    setEditing(false);
+    if (name.trim() && name.trim() !== manager.name) {
+      onRename(manager.email, name.trim());
+    } else {
+      setName(manager.name);
+    }
+  };
+
+  return (
+    <div className="team-access__row">
+      {editing ? (
+        <>
+          <input
+            className="team-access__rename-input"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={pending}
+            autoFocus
+          />
+          <div className="team-access__row-actions">
+            <button className="text-btn" type="button" onClick={save} disabled={pending}>
+              Save
+            </button>
+            <button
+              className="text-btn"
+              type="button"
+              onClick={() => {
+                setName(manager.name);
+                setEditing(false);
+              }}
+              disabled={pending}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <strong>
+            {manager.name} · {manager.email}
+          </strong>
+          <div className="team-access__row-actions">
+            <button className="text-btn" type="button" onClick={() => setEditing(true)} disabled={pending}>
+              Edit
+            </button>
+            <button
+              className="text-btn text-btn--danger"
+              type="button"
+              onClick={() => onRemove(manager.email)}
+              disabled={pending}
+            >
+              Remove
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function ProfileSettings({
   account,
-  manager,
+  managers,
   owner,
   onSave,
   onInviteManager,
   managerInvitePending,
   managerInviteError,
+  onRenameManager,
+  onRemoveManager,
+  managerActionPending,
+  managerActionError,
   onSaveBranding,
   brandingPending,
   brandingError,
 }: {
   account: Account;
-  manager: Account | null;
+  managers: Account[];
   owner: Account | null;
   onSave: (event: FormEvent<HTMLFormElement>) => void;
   onInviteManager: (event: FormEvent<HTMLFormElement>) => void;
   managerInvitePending: boolean;
   managerInviteError: string;
+  onRenameManager: (email: string, name: string) => void;
+  onRemoveManager: (email: string) => void;
+  managerActionPending: string;
+  managerActionError: string;
   onSaveBranding: (branding: StudioBranding) => void;
   brandingPending: boolean;
   brandingError: string;
@@ -719,7 +837,7 @@ function ProfileSettings({
     <SplitLayout
       main={
         <Panel>
-          <PanelHead title="Studio identity" description="Shared across owner and manager on this dashboard." />
+          <PanelHead title="Studio identity" description="Shared across everyone on this dashboard." />
           <StudioProfileCard account={account} />
           <div className="team-access">
             <h3>Dashboard access</h3>
@@ -727,29 +845,42 @@ function ProfileSettings({
               <span>Owner</span>
               <strong>{account.role === "owner" ? account.email : owner?.email || "—"}</strong>
             </div>
-            <div className="team-access__row">
-              <span>Manager</span>
-              <strong>
-                {manager ? (
-                  <>
-                    {manager.name} · {manager.email}
-                  </>
+            {managers.length ? (
+              managers.map((manager) =>
+                isOwner ? (
+                  <ManagerRow
+                    key={manager.email}
+                    manager={manager}
+                    onRename={onRenameManager}
+                    onRemove={onRemoveManager}
+                    pending={managerActionPending === manager.email}
+                  />
                 ) : (
-                  "None yet"
-                )}
-              </strong>
-            </div>
-            {isOwner && !manager ? (
+                  <div className="team-access__row" key={manager.email}>
+                    <span>Manager</span>
+                    <strong>
+                      {manager.name} · {manager.email}
+                    </strong>
+                  </div>
+                ),
+              )
+            ) : (
+              <div className="team-access__row">
+                <span>Manager</span>
+                <strong>None yet</strong>
+              </div>
+            )}
+            {isOwner && managerActionError ? (
+              <p className="auth-form__error" role="alert">
+                {managerActionError}
+              </p>
+            ) : null}
+            {isOwner ? (
               <ManagerInviteForm
                 onSubmit={onInviteManager}
                 pending={managerInvitePending}
                 error={managerInviteError}
               />
-            ) : null}
-            {isOwner && manager ? (
-              <p className="team-access__hint">
-                Your manager can sign in at the login page with their email and password.
-              </p>
             ) : null}
           </div>
 

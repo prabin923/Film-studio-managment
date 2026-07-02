@@ -135,18 +135,40 @@ export async function apiUpdateProfile(payload: {
 }
 
 export async function apiGetWorkspaceTeam() {
-  return parseJson<{ manager: Account | null; owner: Account | null }>(
+  return parseJson<{ managers: Account[]; owner: Account | null }>(
     await apiFetch("/api/workspace/manager", fetchOpts),
   );
 }
 
-export async function apiCreateManager(payload: { name: string; email: string; password: string }) {
+export async function apiCreateManager(payload: { name: string; email: string }) {
   return parseJson<{ manager: Account }>(
     await apiFetch("/api/workspace/manager", {
       ...fetchOpts,
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+    }),
+  );
+}
+
+export async function apiRenameManager(email: string, name: string) {
+  return parseJson<{ ok: boolean }>(
+    await apiFetch("/api/workspace/manager", {
+      ...fetchOpts,
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name }),
+    }),
+  );
+}
+
+export async function apiRemoveManager(email: string) {
+  return parseJson<{ ok: boolean }>(
+    await apiFetch("/api/workspace/manager", {
+      ...fetchOpts,
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
     }),
   );
 }

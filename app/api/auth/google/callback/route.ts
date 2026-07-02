@@ -4,13 +4,16 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { loginOrRegisterWithGoogle } from "@/lib/server/auth";
 import { exchangeCodeForTokens, fetchGoogleUserInfo } from "@/lib/server/google-oauth";
-import { GOOGLE_STATE_COOKIE, googleRedirectUri } from "@/lib/server/google-session";
+import { GOOGLE_JOIN_COOKIE, GOOGLE_STATE_COOKIE, googleRedirectUri } from "@/lib/server/google-session";
 import { applySessionCookie } from "@/lib/server/session";
 
 function failureRedirect(request: Request, reason?: string) {
   const url = new URL("/login?error=google", request.url);
   if (reason) url.searchParams.set("reason", reason);
-  return NextResponse.redirect(url);
+  const response = NextResponse.redirect(url);
+  response.cookies.delete(GOOGLE_STATE_COOKIE);
+  response.cookies.delete(GOOGLE_JOIN_COOKIE);
+  return response;
 }
 
 export async function GET(request: Request) {
@@ -18,11 +21,10 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
   const cookieState = cookies().get(GOOGLE_STATE_COOKIE)?.value;
+  const joinOwnerEmail = cookies().get(GOOGLE_JOIN_COOKIE)?.value;
 
   if (!code || !state || !cookieState || state !== cookieState) {
-    const response = failureRedirect(request);
-    response.cookies.delete(GOOGLE_STATE_COOKIE);
-    return response;
+    return failureRedirect(request);
   }
 
   try {
@@ -31,25 +33,23 @@ export async function GET(request: Request) {
     const profile = await fetchGoogleUserInfo(tokens.access_token);
 
     if (!profile.email || !profile.email_verified) {
-      const response = failureRedirect(request);
-      response.cookies.delete(GOOGLE_STATE_COOKIE);
-      return response;
+      return failureRedirect(request);
     }
 
     const result = await loginOrRegisterWithGoogle({
       googleId: profile.sub,
       email: profile.email,
       name: profile.name || "",
+      joinOwnerEmail,
     });
 
     if (!result.ok) {
-      const response = failureRedirect(request, result.error);
-      response.cookies.delete(GOOGLE_STATE_COOKIE);
-      return response;
+      return failureRedirect(request, result.error);
     }
 
     const response = NextResponse.redirect(new URL("/dashboard", request.url));
     response.cookies.delete(GOOGLE_STATE_COOKIE);
+    response.cookies.delete(GOOGLE_JOIN_COOKIE);
     applySessionCookie(response, {
       email: result.account.email,
       workspaceId: result.account.workspaceId,
@@ -58,8 +58,6 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error(error);
-    const response = failureRedirect(request);
-    response.cookies.delete(GOOGLE_STATE_COOKIE);
-    return response;
+    return failureRedirect(request);
   }
 }

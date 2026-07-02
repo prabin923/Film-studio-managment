@@ -51,6 +51,7 @@ export function StaffCard({
           { label: "Net due", value: money(netDue), highlight: netDue > 0 && person.status === "Pending" },
         ]}
       />
+      {person.createdBy ? <p className="record-card__meta">Added by {person.createdBy}</p> : null}
       <footer className="record-card__foot">
         <div className="record-card__actions">
           {person.status !== "Paid" ? (
@@ -93,6 +94,7 @@ export function ExpenseCard({
         <span className="record-card__amount">{money(expense.amount)}</span>
       </header>
       {expense.notes ? <p className="record-card__note">{expense.notes}</p> : null}
+      {expense.createdBy ? <p className="record-card__meta">Added by {expense.createdBy}</p> : null}
       <footer className="record-card__foot record-card__foot--split">
         {onEdit ? (
           <button className="text-btn" type="button" onClick={onEdit}>
@@ -139,6 +141,7 @@ export function InventoryCard({
           { label: "Day rate", value: money(item.dayRate) },
         ]}
       />
+      {item.createdBy ? <p className="record-card__meta">Added by {item.createdBy}</p> : null}
       <footer className="record-card__foot">
         <div className="record-card__actions">
           {item.status !== "Available" ? (
@@ -199,6 +202,7 @@ export function RentalCard({
           { label: "Balance", value: money(balanceDue), highlight: balanceDue > 0 },
         ]}
       />
+      {rental.createdBy ? <p className="record-card__meta">Added by {rental.createdBy}</p> : null}
       <footer className="record-card__foot">
         <div className="record-card__actions">
           {rental.status === "Reserved" ? (

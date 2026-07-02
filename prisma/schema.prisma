@@ -61,6 +61,14 @@ model PasswordResetToken {
   @@index([accountId])
 }
 
+model RateLimitHit {
+  id        String   @id
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
 model Client {
   id             String   @id
   workspaceId    String
@@ -76,6 +84,7 @@ model Client {
   assignedStaff  String   @default("")
   status         String
   notes          String   @default("")
+  createdBy      String   @default("")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -90,6 +99,7 @@ model Expense {
   vendor      String @default("")
   amount      Int
   notes       String @default("")
+  createdBy   String @default("")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -105,6 +115,7 @@ model StaffRecord {
   advance       Int
   deduction     Int
   status        String
+  createdBy     String @default("")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -121,6 +132,7 @@ model InventoryItem {
   condition   String @default("")
   dayRate     Int
   status      String
+  createdBy   String @default("")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
@@ -140,6 +152,7 @@ model Rental {
   paidAmount      Int
   status          String
   returnCondition String @default("")
+  createdBy       String @default("")
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 

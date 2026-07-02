@@ -5,6 +5,7 @@ import { requestPasswordReset } from "@/lib/server/password-reset";
 import { sendPasswordResetEmail } from "@/lib/server/email";
 import { databaseErrorMessage } from "@/lib/server/db-error";
 import { getAppUrl } from "@/lib/server/app-url";
+import { checkRateLimit, requestIp } from "@/lib/server/rate-limit";
 
 export async function POST(request: Request) {
   try {
@@ -13,6 +14,12 @@ export async function POST(request: Request) {
 
     if (!email) {
       return NextResponse.json({ error: "Enter your email." }, { status: 400 });
+    }
+
+    const ip = requestIp(request);
+    const ipOk = await checkRateLimit(`reset:ip:${ip}`, { max: 5, windowMs: 15 * 60 * 1000 });
+    if (!ipOk) {
+      return NextResponse.json({ error: "Too many requests. Try again in a few minutes." }, { status: 429 });
     }
 
     const token = await requestPasswordReset(email);

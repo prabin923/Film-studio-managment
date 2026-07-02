@@ -30,10 +30,6 @@ export function confirmRemove(label: string): boolean {
   return window.confirm(`Remove ${label}? This cannot be undone.`);
 }
 
-export function isDemoResetEnabled(): boolean {
-  return process.env.NODE_ENV !== "production";
-}
-
 export function daysUntil(date: string, anchor = today): number {
   const ms = new Date(`${date}T12:00:00`).getTime() - new Date(`${anchor}T12:00:00`).getTime();
   return Math.ceil(ms / (1000 * 60 * 60 * 24));

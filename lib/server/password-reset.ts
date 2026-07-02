@@ -3,13 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { newId } from "@/app/lib/format";
 import { hashPassword } from "./password";
 
-const TOKEN_TTL_MS = 60 * 60 * 1000;
+export const TOKEN_TTL_MS = 60 * 60 * 1000;
+export const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 function hashToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
-export async function requestPasswordReset(email: string): Promise<string | null> {
+export async function requestPasswordReset(email: string, ttlMs: number = TOKEN_TTL_MS): Promise<string | null> {
   const normalizedEmail = email.trim().toLowerCase();
   const account = await prisma.account.findUnique({ where: { email: normalizedEmail } });
   if (!account) return null;
@@ -21,7 +22,7 @@ export async function requestPasswordReset(email: string): Promise<string | null
       id: newId("reset"),
       accountId: account.id,
       tokenHash: hashToken(token),
-      expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+      expiresAt: new Date(Date.now() + ttlMs),
     },
   });
 

@@ -712,6 +712,12 @@ h3 {
   line-height: 1.5;
 }
 
+.record-card__meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
 .record-card__foot {
   display: flex;
   justify-content: flex-end;
@@ -1661,12 +1667,31 @@ a.btn--secondary {
 .team-access__row {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 12px;
   font-size: 0.86rem;
 }
 
 .team-access__row span {
   color: var(--text-secondary);
+}
+
+.team-access__row-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.team-access__rename-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.86rem;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
 }
 
 .manager-invite {
@@ -1693,13 +1718,6 @@ a.btn--secondary {
 .manager-invite__fields {
   display: grid;
   gap: 10px;
-}
-
-.team-access__hint {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
 }
 
 .auth-tabs {

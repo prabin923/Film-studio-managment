@@ -15,7 +15,7 @@ export type ManagerInviteResult =
 async function createManagerForWorkspace(input: {
   workspaceId: string;
   email: string;
-  password: string;
+  password?: string;
   name: string;
 }): Promise<ManagerInviteResult> {
   const email = input.email.trim().toLowerCase();
@@ -29,7 +29,7 @@ async function createManagerForWorkspace(input: {
     return { ok: false, error: "Enter the manager's email." };
   }
 
-  if (input.password.length < 8) {
+  if (input.password !== undefined && input.password.length < 8) {
     return { ok: false, error: "Password must be at least 8 characters." };
   }
 
@@ -43,23 +43,12 @@ async function createManagerForWorkspace(input: {
     return { ok: false, error: "Workspace not found." };
   }
 
-  const managerExists = await prisma.account.findFirst({
-    where: { workspaceId: input.workspaceId, role: "manager" },
-  });
-
-  if (managerExists) {
-    return {
-      ok: false,
-      error: "This studio already has a manager. Remove them first or use their login.",
-    };
-  }
-
   await prisma.account.create({
     data: {
       id: newId("account"),
       workspaceId: input.workspaceId,
       email,
-      passwordHash: hashPassword(input.password),
+      passwordHash: input.password ? hashPassword(input.password) : null,
       name,
       role: "manager",
     },
@@ -71,14 +60,53 @@ async function createManagerForWorkspace(input: {
 
 export async function createManagerByOwner(
   ownerWorkspaceId: string,
-  input: { email: string; password: string; name: string },
+  input: { email: string; name: string },
 ): Promise<ManagerInviteResult> {
   return createManagerForWorkspace({
     workspaceId: ownerWorkspaceId,
     email: input.email,
-    password: input.password,
     name: input.name,
   });
+}
+
+export type ManagerActionResult = { ok: true } | { ok: false; error: string };
+
+async function findManagerInWorkspace(ownerWorkspaceId: string, managerEmail: string) {
+  return prisma.account.findFirst({
+    where: { email: managerEmail.trim().toLowerCase(), workspaceId: ownerWorkspaceId, role: "manager" },
+  });
+}
+
+export async function removeManager(
+  ownerWorkspaceId: string,
+  managerEmail: string,
+): Promise<ManagerActionResult> {
+  const manager = await findManagerInWorkspace(ownerWorkspaceId, managerEmail);
+  if (!manager) {
+    return { ok: false, error: "Manager not found for this studio." };
+  }
+
+  await prisma.account.delete({ where: { id: manager.id } });
+  return { ok: true };
+}
+
+export async function renameManager(
+  ownerWorkspaceId: string,
+  managerEmail: string,
+  name: string,
+): Promise<ManagerActionResult> {
+  const trimmedName = name.trim();
+  if (!trimmedName) {
+    return { ok: false, error: "Enter a name." };
+  }
+
+  const manager = await findManagerInWorkspace(ownerWorkspaceId, managerEmail);
+  if (!manager) {
+    return { ok: false, error: "Manager not found for this studio." };
+  }
+
+  await prisma.account.update({ where: { id: manager.id }, data: { name: trimmedName } });
+  return { ok: true };
 }
 
 export async function loginWithPassword(email: string, password: string): Promise<AuthResult> {
@@ -93,7 +121,12 @@ export async function loginWithPassword(email: string, password: string): Promis
   }
 
   if (!row.passwordHash) {
-    return { ok: false, error: "This account signs in with Google. Use \"Continue with Google\" below." };
+    return {
+      ok: false,
+      error: row.googleId
+        ? "This account signs in with Google. Use \"Continue with Google\" below."
+        : "This account hasn't set a password yet. Check your email for an invite link, or use \"Forgot password?\" to set one.",
+    };
   }
 
   if (!verifyPassword(password, row.passwordHash)) {
@@ -199,6 +232,7 @@ export async function loginOrRegisterWithGoogle(profile: {
   googleId: string;
   email: string;
   name: string;
+  joinOwnerEmail?: string;
 }): Promise<AuthResult> {
   const email = profile.email.trim().toLowerCase();
 
@@ -225,9 +259,36 @@ export async function loginOrRegisterWithGoogle(profile: {
     };
   }
 
+  const name = profile.name.trim() || email;
+
+  if (profile.joinOwnerEmail) {
+    const owner = await prisma.account.findFirst({
+      where: { email: profile.joinOwnerEmail.trim().toLowerCase(), role: "owner" },
+    });
+
+    if (!owner) {
+      return { ok: false, error: "No studio found for that owner email." };
+    }
+
+    await prisma.account.create({
+      data: {
+        id: newId("account"),
+        workspaceId: owner.workspaceId,
+        email,
+        googleId: profile.googleId,
+        name,
+        role: "manager",
+      },
+    });
+
+    const workspace = await prisma.workspace.findUniqueOrThrow({ where: { id: owner.workspaceId } });
+    const account = accountFromWorkspaceRow(workspace, { name, email, role: "manager" });
+    const store = await loadStore(owner.workspaceId);
+    return { ok: true, account, store };
+  }
+
   const workspaceId = newId("workspace");
   const accountId = newId("account");
-  const name = profile.name.trim() || email;
 
   await prisma.workspace.create({
     data: {

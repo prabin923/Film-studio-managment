@@ -14,6 +14,7 @@ export const seed: Store = {
   clients: [
     {
       id: "client-1",
+      createdBy: "",
       name: "Aarav & Simran",
       phone: "9800000001",
       projectType: "Wedding film",
@@ -29,6 +30,7 @@ export const seed: Store = {
     },
     {
       id: "client-2",
+      createdBy: "",
       name: "Himalayan Events",
       phone: "9800000002",
       projectType: "Corporate video",
@@ -44,6 +46,7 @@ export const seed: Store = {
     },
     {
       id: "client-3",
+      createdBy: "",
       name: "Priya & Rohan",
       phone: "9800000003",
       projectType: "Pre-wedding shoot",
@@ -59,6 +62,7 @@ export const seed: Store = {
     },
     {
       id: "client-4",
+      createdBy: "",
       name: "Everest Hospitality",
       phone: "9800000004",
       projectType: "Corporate video",
@@ -74,6 +78,7 @@ export const seed: Store = {
     },
     {
       id: "client-5",
+      createdBy: "",
       name: "Anisha Gurung",
       phone: "9800000005",
       projectType: "Music video",
@@ -91,6 +96,7 @@ export const seed: Store = {
   expenses: [
     {
       id: "expense-1",
+      createdBy: "",
       date: today,
       category: "Travel",
       vendor: "Fuel and parking",
@@ -99,6 +105,7 @@ export const seed: Store = {
     },
     {
       id: "expense-2",
+      createdBy: "",
       date: today,
       category: "Equipment",
       vendor: "Camera service",
@@ -109,6 +116,7 @@ export const seed: Store = {
   staff: [
     {
       id: "staff-1",
+      createdBy: "",
       name: "Studio Director",
       role: "Owner / Director",
       monthlySalary: 7500000,
@@ -118,6 +126,7 @@ export const seed: Store = {
     },
     {
       id: "staff-2",
+      createdBy: "",
       name: "Lead Editor",
       role: "Editor",
       monthlySalary: 4200000,
@@ -127,6 +136,7 @@ export const seed: Store = {
     },
     {
       id: "staff-3",
+      createdBy: "",
       name: "Cinematographer",
       role: "Cinematographer",
       monthlySalary: 5000000,
@@ -138,6 +148,7 @@ export const seed: Store = {
   inventory: [
     {
       id: "item-1",
+      createdBy: "",
       name: "Sony FX3",
       category: "Camera",
       serial: "FX3-ST-001",
@@ -147,6 +158,7 @@ export const seed: Store = {
     },
     {
       id: "item-2",
+      createdBy: "",
       name: "Sigma 24-70mm f/2.8",
       category: "Lens",
       serial: "SIG-2470-004",
@@ -156,6 +168,7 @@ export const seed: Store = {
     },
     {
       id: "item-3",
+      createdBy: "",
       name: "DJI Ronin RS3 Pro",
       category: "Stabilizer",
       serial: "RS3-009",
@@ -167,6 +180,7 @@ export const seed: Store = {
   rentals: [
     {
       id: "rental-1",
+      createdBy: "",
       renter: "Kantipur Films",
       phone: "9811111111",
       itemId: "item-1",

@@ -73,9 +73,11 @@ export function ProjectCard({
         </div>
       </dl>
 
-      {!compact && (client.assignedStaff || client.location) ? (
+      {!compact && (client.assignedStaff || client.location || client.createdBy) ? (
         <p className="project-card__meta">
-          {[client.assignedStaff || "Unassigned", client.location].filter(Boolean).join(" · ")}
+          {[client.assignedStaff || "Unassigned", client.location, client.createdBy && `Added by ${client.createdBy}`]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       ) : null}
 
