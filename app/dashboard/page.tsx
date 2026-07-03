@@ -32,6 +32,7 @@ import {
 import { isStudioProfileComplete, normalizeAccount } from "../lib/accounts";
 import { normalizeStudioBranding } from "../lib/studio-branding";
 import { StudioSidebarBrand } from "../components/studio-brand";
+import { MobileTabBar, MobileTopBar } from "../components/mobile-nav";
 import { StudioBrandingForm } from "../components/studio-branding-form";
 import type { StudioBranding } from "../lib/types";
 import { ProjectCard } from "../components/project-card";
@@ -602,7 +603,7 @@ export default function DashboardPage() {
   const signOut = async () => {
     await apiLogout();
     setAccount(null);
-    router.push("/");
+    router.replace("/login");
   };
 
   const activeNav = filterNavForRole(role);
@@ -632,6 +633,7 @@ export default function DashboardPage() {
       ) : null}
 
       <main className={`app-shell app-shell--admin${showStudioProfileSetup ? " app-shell--dimmed" : ""}`}>
+      <MobileTopBar account={account} />
       <aside className="sidebar">
         <StudioSidebarBrand studioName={account.studioName} branding={account} />
         <nav className="nav" aria-label="Main sections">
@@ -756,6 +758,7 @@ export default function DashboardPage() {
           />
         )}
       </section>
+      <MobileTabBar view={view} navigate={navigateView} role={role} account={account} onSignOut={signOut} />
     </main>
     </>
   );
