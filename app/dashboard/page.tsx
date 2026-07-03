@@ -10,7 +10,7 @@ import { AnalyticsCharts } from "../components/analytics-charts";
 import { MonthlyReports } from "../components/monthly-reports";
 import { NewRentalPayload, RentalForm } from "../components/rental-form";
 import { SaveStatusBar, type SaveState } from "../components/save-status";
-import { ManagerInviteForm, StudioProfileCard, StudioProfileSetup } from "../components/studio-profile";
+import { ChangePasswordForm, ManagerInviteForm, StudioProfileCard, StudioProfileSetup } from "../components/studio-profile";
 import { ThemeToggle } from "../components/theme-toggle";
 import {
   confirmRemove,
@@ -19,6 +19,7 @@ import {
   sortClientsByEventDate,
 } from "../lib/dashboard-utils";
 import {
+  apiChangePassword,
   apiCreateManager,
   apiGetWorkspaceTeam,
   apiLogout,
@@ -92,6 +93,9 @@ export default function DashboardPage() {
   const [profileSetupError, setProfileSetupError] = useState("");
   const [managerInvitePending, setManagerInvitePending] = useState(false);
   const [managerInviteError, setManagerInviteError] = useState("");
+  const [changePasswordPending, setChangePasswordPending] = useState(false);
+  const [changePasswordError, setChangePasswordError] = useState("");
+  const [changePasswordSuccess, setChangePasswordSuccess] = useState("");
   const [brandingPending, setBrandingPending] = useState(false);
   const [brandingError, setBrandingError] = useState("");
   const [workspaceTeam, setWorkspaceTeam] = useState<{ managers: Account[]; owner: Account | null }>({
@@ -459,18 +463,46 @@ export default function DashboardPage() {
     setManagerInvitePending(true);
     setManagerInviteError("");
 
+    // Capture the form element before awaiting — React nullifies
+    // event.currentTarget after the handler's sync phase, so reading it after
+    // the await throws "Cannot read properties of null (reading 'reset')".
+    const form = event.currentTarget;
     try {
-      const data = new FormData(event.currentTarget);
+      const data = new FormData(form);
       const result = await apiCreateManager({
         name: String(data.get("name") || ""),
         email: String(data.get("email") || ""),
+        password: String(data.get("password") || ""),
       });
       setWorkspaceTeam((current) => ({ ...current, managers: [...current.managers, result.manager] }));
-      event.currentTarget.reset();
+      form.reset();
     } catch (error) {
       setManagerInviteError(error instanceof Error ? error.message : "Failed to add manager.");
     } finally {
       setManagerInvitePending(false);
+    }
+  };
+
+  const handleChangePassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setChangePasswordPending(true);
+    setChangePasswordError("");
+    setChangePasswordSuccess("");
+
+    const form = event.currentTarget;
+    try {
+      const data = new FormData(form);
+      await apiChangePassword({
+        currentPassword: String(data.get("currentPassword") || ""),
+        newPassword: String(data.get("newPassword") || ""),
+      });
+      setChangePasswordSuccess("Password updated. Use it next time you sign in.");
+      form.reset();
+    } catch (error) {
+      setChangePasswordError(error instanceof Error ? error.message : "Failed to change password.");
+    } finally {
+      setChangePasswordPending(false);
     }
   };
 
@@ -710,6 +742,10 @@ export default function DashboardPage() {
             onInviteManager={handleInviteManager}
             managerInvitePending={managerInvitePending}
             managerInviteError={managerInviteError}
+            onChangePassword={handleChangePassword}
+            changePasswordPending={changePasswordPending}
+            changePasswordError={changePasswordError}
+            changePasswordSuccess={changePasswordSuccess}
             onRenameManager={handleRenameManager}
             onRemoveManager={handleRemoveManager}
             managerActionPending={managerActionPending}
@@ -808,6 +844,10 @@ function ProfileSettings({
   onInviteManager,
   managerInvitePending,
   managerInviteError,
+  onChangePassword,
+  changePasswordPending,
+  changePasswordError,
+  changePasswordSuccess,
   onRenameManager,
   onRemoveManager,
   managerActionPending,
@@ -823,6 +863,10 @@ function ProfileSettings({
   onInviteManager: (event: FormEvent<HTMLFormElement>) => void;
   managerInvitePending: boolean;
   managerInviteError: string;
+  onChangePassword: (event: FormEvent<HTMLFormElement>) => void;
+  changePasswordPending: boolean;
+  changePasswordError: string;
+  changePasswordSuccess: string;
   onRenameManager: (email: string, name: string) => void;
   onRemoveManager: (email: string) => void;
   managerActionPending: string;
@@ -883,6 +927,13 @@ function ProfileSettings({
               />
             ) : null}
           </div>
+
+          <ChangePasswordForm
+            onSubmit={onChangePassword}
+            pending={changePasswordPending}
+            error={changePasswordError}
+            success={changePasswordSuccess}
+          />
 
           <StudioBrandingForm
             studioName={account.studioName}

@@ -140,9 +140,20 @@ export async function apiGetWorkspaceTeam() {
   );
 }
 
-export async function apiCreateManager(payload: { name: string; email: string }) {
+export async function apiCreateManager(payload: { name: string; email: string; password?: string }) {
   return parseJson<{ manager: Account }>(
     await apiFetch("/api/workspace/manager", {
+      ...fetchOpts,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }),
+  );
+}
+
+export async function apiChangePassword(payload: { currentPassword?: string; newPassword: string }) {
+  return parseJson<{ ok: boolean }>(
+    await apiFetch("/api/auth/change-password", {
       ...fetchOpts,
       method: "POST",
       headers: { "Content-Type": "application/json" },
