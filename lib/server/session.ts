@@ -40,10 +40,6 @@ export function applySessionCookie(response: NextResponse, payload: SessionPaylo
   return response;
 }
 
-export function setSessionCookie(payload: SessionPayload) {
-  cookies().set(SESSION_COOKIE, JSON.stringify(payload), sessionCookieOptions());
-}
-
 export function clearSessionCookie() {
   cookies().delete(SESSION_COOKIE);
 }

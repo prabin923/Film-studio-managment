@@ -1,14 +1,7 @@
 import type { Store } from "./types";
 
 export const today = new Date().toISOString().slice(0, 10);
-export const storageKey = "wedstudio-os-store-v1";
-export const accountKey = "wedstudio-os-account-v1";
 export const accountsRegistryKey = "wedstudio-os-accounts-v1";
-export const workspacesRegistryKey = "wedstudio-os-workspaces-v1";
-
-export function workspaceStoreKey(workspaceId: string) {
-  return `wedstudio-os-store-${workspaceId}`;
-}
 
 export const seed: Store = {
   clients: [

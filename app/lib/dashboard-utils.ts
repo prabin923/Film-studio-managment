@@ -21,11 +21,6 @@ export function parseViewFromSearch(search: string): View | null {
   return isValidView(view) ? view : null;
 }
 
-export function viewToUrl(view: View): string {
-  if (view === "dashboard") return "/dashboard";
-  return `/dashboard?view=${view}`;
-}
-
 export function confirmRemove(label: string): boolean {
   return window.confirm(`Remove ${label}? This cannot be undone.`);
 }
@@ -38,10 +33,6 @@ export function daysUntil(date: string, anchor = today): number {
 export function isEventSoon(eventDate: string, withinDays = 14): boolean {
   const days = daysUntil(eventDate);
   return days >= 0 && days <= withinDays;
-}
-
-export function isEventPast(eventDate: string): boolean {
-  return daysUntil(eventDate) < 0;
 }
 
 export function sortClientsByEventDate<T extends { eventDate: string }>(clients: T[]): T[] {

@@ -1,5 +1,5 @@
 import { accountsRegistryKey } from "./seed";
-import { DEFAULT_STUDIO_BRANDING, normalizeStudioBranding } from "./studio-branding";
+import { normalizeStudioBranding } from "./studio-branding";
 import type { Account, Role, StoredAccount } from "./types";
 
 export function normalizeRole(role: string): Role {
@@ -30,16 +30,6 @@ export function normalizeAccount(account: Partial<Account> & Pick<Account, "emai
   };
 }
 
-export function accountWithDefaultBranding(account: Account): Account {
-  return normalizeAccount({
-    ...account,
-    logoData: account.logoData || DEFAULT_STUDIO_BRANDING.logoData,
-    brandColor: account.brandColor || DEFAULT_STUDIO_BRANDING.brandColor,
-    brandTextColor: account.brandTextColor || DEFAULT_STUDIO_BRANDING.brandTextColor,
-    brandShape: account.brandShape || DEFAULT_STUDIO_BRANDING.brandShape,
-  });
-}
-
 export function loadAccountsRegistry(): Record<string, StoredAccount> {
   if (typeof window === "undefined") return {};
 
@@ -59,24 +49,6 @@ export function getStoredAccount(email: string): StoredAccount | null {
   const stored = registry[key];
   if (!stored?.email) return null;
   return { ...normalizeAccount(stored), password: stored.password };
-}
-
-export function getOwnerAccount(workspaceId: string): StoredAccount | null {
-  return (
-    Object.values(loadAccountsRegistry()).find(
-      (account) => account.workspaceId === workspaceId && account.role === "owner",
-    ) ?? null
-  );
-}
-
-export function saveAccountToRegistry(account: StoredAccount) {
-  const normalized = normalizeAccount(account);
-  const registry = loadAccountsRegistry();
-  registry[normalized.email] = {
-    ...normalized,
-    password: account.password,
-  };
-  window.localStorage.setItem(accountsRegistryKey, JSON.stringify(registry));
 }
 
 const DEFAULT_STUDIO_NAME = "Your Wedding Film Studio";
