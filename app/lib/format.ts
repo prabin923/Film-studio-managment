@@ -31,6 +31,7 @@ export type StatusTone = "neutral" | "positive" | "caution" | "negative";
 export function statusTone(status: string): StatusTone {
   if (["Paid", "Available", "Returned", "Delivered", "Booked"].includes(status)) return "positive";
   if (["Unpaid", "Pending", "Maintenance", "Out", "Editing", "Inquiry"].includes(status)) return "caution";
+  if (["Overdue", "Void"].includes(status)) return "negative";
   if (status === "Rented") return "negative";
   return "neutral";
 }

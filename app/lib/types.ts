@@ -6,6 +6,7 @@ export type View =
   | "salary"
   | "inventory"
   | "rentals"
+  | "bills"
   | "reports"
   | "profile";
 export type ProjectStatus = "Inquiry" | "Booked" | "Editing" | "Delivered";
@@ -116,12 +117,46 @@ export type Rental = {
   createdBy: string;
 };
 
+export type BillStatus = "Draft" | "Unpaid" | "Paid";
+export type BillSourceType = "custom" | "client" | "rental";
+
+export type BillLine = {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+};
+
+export type Bill = {
+  id: string;
+  number: string;
+  sourceType: BillSourceType;
+  sourceId: string;
+  customerName: string;
+  customerPhone: string;
+  customerAddress: string;
+  issueDate: string;
+  dueDate: string;
+  status: BillStatus;
+  lineItems: BillLine[];
+  subtotal: number;
+  discount: number;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  paidAmount: number;
+  notes: string;
+  terms: string;
+  createdBy: string;
+};
+
 export type Store = {
   clients: Client[];
   expenses: Expense[];
   staff: Staff[];
   inventory: InventoryItem[];
   rentals: Rental[];
+  bills: Bill[];
 };
 
 export type Stats = {

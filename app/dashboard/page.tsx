@@ -7,6 +7,7 @@ import { EditModal } from "../components/edit-modal";
 import { ExpenseCard, InventoryCard, RentalCard, StaffCard } from "../components/ledger-cards";
 import { AdminDashboardHome } from "../components/admin-dashboard";
 import { AnalyticsCharts } from "../components/analytics-charts";
+import { Billing, type NewBillPayload } from "../components/billing";
 import { MonthlyReports } from "../components/monthly-reports";
 import { NewRentalPayload, RentalForm } from "../components/rental-form";
 import { SaveStatusBar, type SaveState } from "../components/save-status";
@@ -50,6 +51,8 @@ import { money, newId, statusTone, toPaisa, setGlobalCurrency, getGlobalCurrency
 import { nav, seed, today } from "../lib/seed";
 import type {
   Account,
+  Bill,
+  BillStatus,
   Client,
   Expense,
   InventoryItem,
@@ -79,7 +82,7 @@ function normalizeClient(client: Client): Client {
 }
 
 function normalizeStore(store: Store): Store {
-  return { ...store, clients: store.clients.map(normalizeClient) };
+  return { ...store, clients: store.clients.map(normalizeClient), bills: store.bills ?? [] };
 }
 
 export default function DashboardPage() {
@@ -385,6 +388,35 @@ export default function DashboardPage() {
             : current.inventory,
       };
     });
+  };
+
+  const addBill = (payload: NewBillPayload) => {
+    const bill: Bill = {
+      id: newId("bill"),
+      ...payload,
+      createdBy: account?.name || account?.email || "",
+    };
+    setStore((current) => ({ ...current, bills: [bill, ...(current.bills ?? [])] }));
+  };
+
+  const updateBillStatus = (billId: string, status: BillStatus) => {
+    setStore((current) => ({
+      ...current,
+      bills: current.bills.map((bill) => ({
+        ...bill,
+        ...(bill.id === billId
+          ? {
+              status,
+              paidAmount:
+                status === "Paid"
+                  ? bill.total
+                  : status === "Draft" || (bill.status === "Paid" && status === "Unpaid")
+                    ? 0
+                    : Math.min(bill.paidAmount, bill.total),
+            }
+          : {}),
+      })),
+    }));
   };
 
   const deleteRecord = (collection: keyof Store, recordId: string, label: string) => {
@@ -730,6 +762,18 @@ export default function DashboardPage() {
             addRentals={addRentals}
             updateRentalStatus={updateRentalStatus}
             deleteRental={(recordId, label) => deleteRecord("rentals", recordId, label)}
+          />
+        )}
+        {view === "bills" && (
+          <Billing
+            account={account}
+            bills={store.bills}
+            clients={store.clients}
+            rentals={store.rentals}
+            inventory={store.inventory}
+            addBill={addBill}
+            updateBillStatus={updateBillStatus}
+            deleteBill={(recordId, label) => deleteRecord("bills", recordId, label)}
           />
         )}
         {view === "reports" && role === "owner" && <Reports stats={stats} store={store} />}

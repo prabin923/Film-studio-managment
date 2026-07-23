@@ -186,12 +186,14 @@ export const seed: Store = {
       returnCondition: "",
     },
   ],
+  bills: [],
 };
 
 export const nav: { view: import("./types").View; label: string; ownerOnly?: boolean }[] = [
   { view: "dashboard", label: "Dashboard" },
   { view: "profile", label: "Profile" },
   { view: "clients", label: "Clients" },
+  { view: "bills", label: "Bills" },
   { view: "rentals", label: "Rentals" },
   { view: "inventory", label: "Inventory" },
   { view: "expenses", label: "Expenses" },

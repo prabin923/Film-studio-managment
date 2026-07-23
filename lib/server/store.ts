@@ -1,14 +1,19 @@
 import { brandingFromWorkspace } from "@/app/lib/studio-branding";
 import { prisma } from "@/lib/prisma";
-import type { Account, Client, Expense, InventoryItem, Rental, Staff, Store } from "@/app/lib/types";
+import type { Account, Bill, Client, Expense, InventoryItem, Rental, Staff, Store } from "@/app/lib/types";
 
 export async function loadStore(workspaceId: string): Promise<Store> {
-  const [clients, expenses, staff, inventory, rentals] = await Promise.all([
+  const [clients, expenses, staff, inventory, rentals, bills] = await Promise.all([
     prisma.client.findMany({ where: { workspaceId } }),
     prisma.expense.findMany({ where: { workspaceId } }),
     prisma.staffRecord.findMany({ where: { workspaceId } }),
     prisma.inventoryItem.findMany({ where: { workspaceId } }),
     prisma.rental.findMany({ where: { workspaceId } }),
+    prisma.bill.findMany({
+      where: { workspaceId },
+      include: { lineItems: { orderBy: { position: "asc" } } },
+      orderBy: [{ issueDate: "desc" }, { number: "desc" }],
+    }),
   ]);
 
   return {
@@ -17,6 +22,10 @@ export async function loadStore(workspaceId: string): Promise<Store> {
     staff: staff as Staff[],
     inventory: inventory as InventoryItem[],
     rentals: rentals as Rental[],
+    bills: bills.map(({ lineItems, ...bill }) => ({
+      ...bill,
+      lineItems: lineItems.map(({ billId: _billId, position: _position, ...line }) => line),
+    })) as Bill[],
   };
 }
 
@@ -26,6 +35,11 @@ export async function saveStore(workspaceId: string, store: Store) {
   const staffIds = store.staff.map((s) => s.id);
   const inventoryIds = store.inventory.map((i) => i.id);
   const rentalIds = store.rentals.map((r) => r.id);
+  // Older open tabs can still send a snapshot without the newly added bills
+  // collection. In that case, leave existing bills untouched instead of
+  // interpreting the missing property as a request to delete them all.
+  const bills = Array.isArray(store.bills) ? store.bills : null;
+  const billIds = bills?.map((bill) => bill.id) ?? [];
 
   await prisma.$transaction(async (tx) => {
     await tx.client.deleteMany({
@@ -43,6 +57,11 @@ export async function saveStore(workspaceId: string, store: Store) {
     await tx.rental.deleteMany({
       where: { workspaceId, ...(rentalIds.length ? { id: { notIn: rentalIds } } : {}) },
     });
+    if (bills) {
+      await tx.bill.deleteMany({
+        where: { workspaceId, ...(billIds.length ? { id: { notIn: billIds } } : {}) },
+      });
+    }
 
     for (const client of store.clients) {
       const row = { ...client, createdAt: client.createdAt ?? client.eventDate };
@@ -79,6 +98,20 @@ export async function saveStore(workspaceId: string, store: Store) {
         create: { workspaceId, ...rental },
         update: { ...rental, workspaceId },
       });
+    }
+    for (const bill of bills ?? []) {
+      const { lineItems, ...row } = bill;
+      await tx.bill.upsert({
+        where: { id: bill.id },
+        create: { workspaceId, ...row },
+        update: { ...row, workspaceId },
+      });
+      await tx.billLine.deleteMany({ where: { billId: bill.id } });
+      if (lineItems.length) {
+        await tx.billLine.createMany({
+          data: lineItems.map((line, position) => ({ ...line, billId: bill.id, position })),
+        });
+      }
     }
   });
 }

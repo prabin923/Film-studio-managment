@@ -25,6 +25,10 @@ export const pageCopy: Record<View, { title: string; description: string }> = {
     title: "Rentals",
     description: "Bookings, deposits, balances, and return tracking.",
   },
+  bills: {
+    title: "Bills & invoices",
+    description: "Create itemized bills, track payment, and print or save polished PDFs.",
+  },
   reports: {
     title: "Reports",
     description: "Month-wise income, expenses, charts, and ledger totals.",

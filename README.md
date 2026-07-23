@@ -63,6 +63,7 @@ Schema reference: [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md)
 - Manager invites over email
 - Dashboard with role-aware navigation
 - Clients and projects — package, paid, and due amounts
+- Itemized bills and invoices — project/rental prefill, discounts, tax, payment status, and print-to-PDF
 - Expense ledger, salary records, inventory, and rental bookings
 - Return tracking; rentals mark gear as rented, returns mark it available
 - Monthly reports and charts; money entered in rupees, stored in paisa

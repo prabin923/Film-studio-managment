@@ -29,6 +29,7 @@ model Workspace {
   staff     StaffRecord[]
   inventory InventoryItem[]
   rentals   Rental[]
+  bills     Bill[]
 }
 
 model Account {
@@ -157,4 +158,46 @@ model Rental {
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
+}
+
+model Bill {
+  id              String @id
+  workspaceId     String
+  number          String
+  sourceType      String @default("custom")
+  sourceId        String @default("")
+  customerName    String
+  customerPhone   String @default("")
+  customerAddress String @default("")
+  issueDate       String
+  dueDate         String
+  status          String
+  subtotal        Int
+  discount        Int    @default(0)
+  taxRate         Float  @default(0)
+  taxAmount       Int    @default(0)
+  total           Int
+  paidAmount      Int    @default(0)
+  notes           String @default("")
+  terms           String @default("")
+  createdBy       String @default("")
+
+  workspace Workspace  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lineItems BillLine[]
+
+  @@unique([workspaceId, number])
+  @@index([workspaceId])
+}
+
+model BillLine {
+  id          String @id
+  billId      String
+  description String
+  quantity    Float
+  unitPrice   Int
+  position    Int
+
+  bill Bill @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@index([billId])
 }

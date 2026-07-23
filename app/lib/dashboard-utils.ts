@@ -8,6 +8,7 @@ const VALID_VIEWS = new Set<View>([
   "salary",
   "inventory",
   "rentals",
+  "bills",
   "reports",
   "profile",
 ]);
